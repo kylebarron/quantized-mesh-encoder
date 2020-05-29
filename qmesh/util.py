@@ -52,13 +52,9 @@ def zig_zag_encode(n):
         0 = 0
         1 = 2
         2 = 4
-
-    TODO this could probably be better without >>31
     """
     return (n << 1) ^ (n >> 31)
 
--2 << 1
--2 >> 31
 
 def zig_zag_decode(z):
     """ Reverses ZigZag encoding """
