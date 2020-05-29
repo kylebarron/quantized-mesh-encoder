@@ -1,6 +1,10 @@
-triangles
-vertices
-positions[0]
+import numpy as np
+from .util import pack_entry, zig_zag_encode
+from constants import VERTEX_DATA
+
+# triangles
+# vertices
+# positions[0]
 
 
 def encode(positions):
@@ -107,7 +111,7 @@ def interp_positions(positions, bounds=None):
 def _write_header(f, header):
     # Header
     for k, v in TerrainTile.quantizedMeshHeader.items():
-        f.write(packEntry(v, self.header[k]))
+        f.write(pack_entry(v, self.header[k]))
 
 
 def write_vertices(f, positions):
@@ -116,7 +120,7 @@ def write_vertices(f, positions):
     n_vertices = max(positions.shape)
 
     # Write vertex count
-    f.write(packEntry(VERTEX_DATA['vertexCount'], n_vertices))
+    f.write(pack_entry(VERTEX_DATA['vertexCount'], n_vertices))
 
     u = positions[:, 0]
     v = positions[:, 1]
@@ -138,17 +142,17 @@ def write_vertices(f, positions):
         h_diff, 1)).astype(np.uint16)
 
     # Write first value
-    f.write(packEntry(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))
+    f.write(pack_entry(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))
     # Write array. Must be uint16
     f.write(u_zz.tobytes())
 
     # Write first value
-    f.write(packEntry(VERTEX_DATA['vVertexCount'], zig_zag_encode(v[0])))
+    f.write(pack_entry(VERTEX_DATA['vVertexCount'], zig_zag_encode(v[0])))
     # Write array. Must be uint16
     f.write(v_zz.tobytes())
 
     # Write first value
-    f.write(packEntry(VERTEX_DATA['heightVertexCount'], zig_zag_encode(h[0])))
+    f.write(pack_entry(VERTEX_DATA['heightVertexCount'], zig_zag_encode(h[0])))
     # Write array. Must be uint16
     f.write(h_zz.tobytes())
 
@@ -159,7 +163,7 @@ def write_indices(f):
     if vertexCount > TerrainTile.BYTESPLIT:
         meta = TerrainTile.indexData32
 
-    f.write(packEntry(meta['triangleCount'], old_div(len(self.indices), 3)))
+    f.write(pack_entry(meta['triangleCount'], old_div(len(self.indices), 3)))
     ind = encodeIndices(self.indices)
     packIndices(f, meta['indices'], ind)
 
@@ -167,21 +171,21 @@ def write_indices(f):
     if vertexCount > TerrainTile.BYTESPLIT:
         meta = TerrainTile.EdgeIndices32
 
-    f.write(packEntry(meta['westVertexCount'], len(self.westI)))
+    f.write(pack_entry(meta['westVertexCount'], len(self.westI)))
     for wi in self.westI:
-        f.write(packEntry(meta['westIndices'], wi))
+        f.write(pack_entry(meta['westIndices'], wi))
 
-    f.write(packEntry(meta['southVertexCount'], len(self.southI)))
+    f.write(pack_entry(meta['southVertexCount'], len(self.southI)))
     for si in self.southI:
-        f.write(packEntry(meta['southIndices'], si))
+        f.write(pack_entry(meta['southIndices'], si))
 
-    f.write(packEntry(meta['eastVertexCount'], len(self.eastI)))
+    f.write(pack_entry(meta['eastVertexCount'], len(self.eastI)))
     for ei in self.eastI:
-        f.write(packEntry(meta['eastIndices'], ei))
+        f.write(pack_entry(meta['eastIndices'], ei))
 
-    f.write(packEntry(meta['northVertexCount'], len(self.northI)))
+    f.write(pack_entry(meta['northVertexCount'], len(self.northI)))
     for ni in self.northI:
-        f.write(packEntry(meta['northIndices'], ni))
+        f.write(pack_entry(meta['northIndices'], ni))
 
 
 #
