@@ -7,6 +7,9 @@ from util_cy import encode_indices
 # vertices
 # positions[0]
 
+# triangles
+# indices = triangles
+
 
 def encode(f, positions, indices):
     encode_header(f, data=None)
