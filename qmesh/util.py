@@ -11,17 +11,6 @@ def pack_entry(type, value):
     return pack('<%s' % type, value)
 
 
-def encode_indices(indices):
-    out = []
-    highest = 0
-    for i in indices:
-        code = highest - i
-        out.append(code)
-        if code == 0:
-            highest += 1
-    return out
-
-
 def zig_zag_encode(n):
     """
     ZigZag-Encodes a number:
