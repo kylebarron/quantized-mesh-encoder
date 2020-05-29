@@ -13,7 +13,7 @@ indent_style = space
 indent_size = 2
 
 # 4 space indentation
-[*.py]
+[*.{py,pyx}]
 indent_size = 4
 
 # Tab indentation (no size specified)

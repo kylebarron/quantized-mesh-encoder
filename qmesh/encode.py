@@ -1,76 +1,63 @@
 import numpy as np
 from .util import pack_entry, zig_zag_encode
-from constants import VERTEX_DATA
+from constants import VERTEX_DATA, HEADER
+from util_cy import encode_indices
 
 # triangles
 # vertices
 # positions[0]
 
 
-def encode(positions):
+def encode(f, positions, indices):
+    encode_header(f, data=None)
+
     # Convert to ndarray
     positions = positions_reshape(positions)
 
     # Linear interpolation to range u, v, h from 0-32767
     positions = interp_positions(positions)
 
-    pass
+    write_vertices(f, positions)
+
+    write_indices(f, indices)
 
 
-def encode_header(view, data, offset):
+def encode_header(f, data):
     """Encode header data
-    /**
-     * Encode header data
-     *
-     * @param  {DataView} view   DataView to fill
-     * @param  {Object} data   Object with data to encode
-     * @param  {Number} offset Offset in DataView
-     * @return {[type]}        [description]
-     */
 
+    Args:
+        - f: Opened file descriptor for writing
+        - data: dict of header data
     """
-    centerX,
-    centerY,
-    centerZ,
-    minimumHeight,
-    maximumHeight,
-    boundingSphereCenterX,
-    boundingSphereCenterY,
-    boundingSphereCenterZ,
-    boundingSphereRadius,
-    horizonOcclusionPointX,
-    horizonOcclusionPointY,
-    horizonOcclusionPointZ
+    f.write(pack_entry(HEADER['centerX'], data['centerX']))
+    f.write(pack_entry(HEADER['centerY'], data['centerY']))
+    f.write(pack_entry(HEADER['centerZ'], data['centerZ']))
 
-    view.setFloat64(offset, centerX, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset, centerY, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset, centerZ, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
+    f.write(pack_entry(HEADER['minimumHeight'], data['minimumHeight']))
+    f.write(pack_entry(HEADER['maximumHeight'], data['maximumHeight']))
 
-    view.setFloat32(offset + 24, minimumHeight, true)
-    offset += Float32Array.BYTES_PER_ELEMENT
-    view.setFloat32(offset + 28, maximumHeight, true)
-    offset += Float32Array.BYTES_PER_ELEMENT
+    f.write(
+        pack_entry(
+            HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
+    f.write(
+        pack_entry(
+            HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
+    f.write(
+        pack_entry(
+            HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
+    f.write(
+        pack_entry(
+            HEADER['boundingSphereRadius'], data['boundingSphereRadius']))
 
-    view.setFloat64(offset + 32, boundingSphereCenterX, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset + 40, boundingSphereCenterY, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset + 48, boundingSphereCenterZ, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset + 56, boundingSphereRadius, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-
-    view.setFloat64(offset + 64, horizonOcclusionPointX, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset + 72, horizonOcclusionPointY, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-    view.setFloat64(offset + 80, horizonOcclusionPointZ, true)
-    offset += Float64Array.BYTES_PER_ELEMENT
-
-    return {view, offset}
+    f.write(
+        pack_entry(
+            HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
+    f.write(
+        pack_entry(
+            HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
+    f.write(
+        pack_entry(
+            HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
 
 
 def positions_reshape(positions):
@@ -106,12 +93,6 @@ def interp_positions(positions, bounds=None):
     h = np.interp(positions[:, 2], (minh, maxh), (0, 32767)).astype(np.int16)
 
     return np.vstack([u, v, h]).T
-
-
-def _write_header(f, header):
-    # Header
-    for k, v in TerrainTile.quantizedMeshHeader.items():
-        f.write(pack_entry(v, self.header[k]))
 
 
 def write_vertices(f, positions):
@@ -157,15 +138,34 @@ def write_vertices(f, positions):
     f.write(h_zz.tobytes())
 
 
-def write_indices(f):
-    # Indices
-    meta = TerrainTile.indexData16
-    if vertexCount > TerrainTile.BYTESPLIT:
-        meta = TerrainTile.indexData32
+def write_indices(f, indices):
+    """Write indices to file
 
-    f.write(pack_entry(meta['triangleCount'], old_div(len(self.indices), 3)))
-    ind = encodeIndices(self.indices)
-    packIndices(f, meta['indices'], ind)
+    """
+    # TODO whether to use 16 or 32 bits
+    indexData32 = True
+
+    # Enforce proper byte alignment
+    # > padding is added before the IndexData to ensure 2 byte alignment for
+    # > IndexData16 and 4 byte alignment for IndexData32.
+    required_offset = 4 if indexData32 else 2
+    remainder = f.tell() % required_offset
+    if remainder:
+        # number of bytes to add
+        n_bytes = required_offset - remainder
+        # TODO write required number of bytes
+
+    # Write number of triangles to file
+    n_triangles = len(indices) / 3
+    f.write(pack_entry(meta['triangleCount'], n_triangles))
+
+    # Encode indices using high water mark encoding
+    encoded_ind = encode_indices(indices)
+    # Write array. Must be either uint16 or uint32, depending on length of
+    # vertices
+    if not indexData32:
+        encoded_ind = encoded_ind.astype(np.uint16)
+    f.write(encoded_ind.tobytes())
 
     meta = TerrainTile.EdgeIndices16
     if vertexCount > TerrainTile.BYTESPLIT:
