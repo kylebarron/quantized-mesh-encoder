@@ -1,20 +1,6 @@
 import numpy as np
 
-# From https://github.com/loicgasser/quantized-mesh-tile/blob/master/quantized_mesh_tile/llh_ecef.py
-# Constants taken from http://cesiumjs.org/2013/04/25/Horizon-culling/
-radiusX = 6378137.0
-radiusY = 6378137.0
-radiusZ = 6356752.3142451793
-
-# Stolen from https://github.com/bistromath/gr-air-modes/blob/master/python/mlat.py
-# WGS84 reference ellipsoid constants
-# http://en.wikipedia.org/wiki/Geodetic_datum#Conversion_calculations
-# http://en.wikipedia.org/wiki/File%3aECEF.png
-wgs84_a = radiusX  # Semi-major axis
-wgs84_b = radiusZ  # Semi-minor axis
-wgs84_e2 = 0.0066943799901975848  # First eccentricity squared
-wgs84_a2 = wgs84_a ** 2  # To speed things up a bit
-wgs84_b2 = wgs84_b ** 2
+from .constants import WGS84_A, WGS84_E2
 
 
 def to_ecef(positions):
@@ -40,12 +26,12 @@ def to_ecef(positions):
     lat *= np.pi / 180
     lon *= np.pi / 180
 
-    n = lambda arr: wgs84_a / np.sqrt(1 - wgs84_e2 * (np.square(np.sin(arr))))
+    n = lambda arr: WGS84_A / np.sqrt(1 - WGS84_E2 * (np.square(np.sin(arr))))
     nlat = n(lat)
 
     x = (nlat + alt) * np.cos(lat) * np.cos(lon)
     y = (nlat + alt) * np.cos(lat) * np.sin(lon)
-    z = (nlat * (1 - wgs84_e2) + alt) * np.sin(lat)
+    z = (nlat * (1 - WGS84_E2) + alt) * np.sin(lat)
 
     # Do I need geoid correction?
     # https://github.com/bistromath/gr-air-modes/blob/9e2515a56609658f168f0c833a14ca4d2332713e/python/mlat.py#L88-L92
