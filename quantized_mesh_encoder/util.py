@@ -7,8 +7,8 @@ from struct import pack
 EPSILON6 = 0.000001
 
 
-def pack_entry(type, value):
-    return pack('<%s' % type, value)
+def pack_entry(fmt, value):
+    return pack(fmt, value)
 
 
 def zig_zag_encode(n):
