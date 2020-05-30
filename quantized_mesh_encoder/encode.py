@@ -1,6 +1,8 @@
+from struct import pack
+
 import numpy as np
-from .util import pack_entry, zig_zag_encode
-from constants import VERTEX_DATA, HEADER, NP_STRUCT_TYPES
+
+from constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
 from util import zig_zag_encode
 from util_cy import encode_indices
 
@@ -36,35 +38,27 @@ def encode_header(f, data):
         - f: Opened file descriptor for writing
         - data: dict of header data
     """
-    f.write(pack_entry(HEADER['centerX'], data['centerX']))
-    f.write(pack_entry(HEADER['centerY'], data['centerY']))
-    f.write(pack_entry(HEADER['centerZ'], data['centerZ']))
+    f.write(pack(HEADER['centerX'], data['centerX']))
+    f.write(pack(HEADER['centerY'], data['centerY']))
+    f.write(pack(HEADER['centerZ'], data['centerZ']))
 
-    f.write(pack_entry(HEADER['minimumHeight'], data['minimumHeight']))
-    f.write(pack_entry(HEADER['maximumHeight'], data['maximumHeight']))
-
-    f.write(
-        pack_entry(
-            HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
-    f.write(
-        pack_entry(
-            HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
-    f.write(
-        pack_entry(
-            HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
-    f.write(
-        pack_entry(
-            HEADER['boundingSphereRadius'], data['boundingSphereRadius']))
+    f.write(pack(HEADER['minimumHeight'], data['minimumHeight']))
+    f.write(pack(HEADER['maximumHeight'], data['maximumHeight']))
 
     f.write(
-        pack_entry(
-            HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
+        pack(HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
     f.write(
-        pack_entry(
-            HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
+        pack(HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
     f.write(
-        pack_entry(
-            HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
+        pack(HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
+    f.write(pack(HEADER['boundingSphereRadius'], data['boundingSphereRadius']))
+
+    f.write(
+        pack(HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
+    f.write(
+        pack(HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
+    f.write(
+        pack(HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
 
 
 def interp_positions(positions, bounds=None):
@@ -101,7 +95,7 @@ def write_vertices(f, positions, n_vertices):
     assert positions.ndim == 2, 'positions must be 2 dimensions'
 
     # Write vertex count
-    f.write(pack_entry(VERTEX_DATA['vertexCount'], n_vertices))
+    f.write(pack(VERTEX_DATA['vertexCount'], n_vertices))
 
     u = positions[:, 0]
     v = positions[:, 1]
@@ -117,17 +111,17 @@ def write_vertices(f, positions, n_vertices):
     h_zz = zig_zag_encode(h_diff).astype(np.uint16)
 
     # Write first value
-    f.write(pack_entry(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))
+    f.write(pack(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))
     # Write array. Must be uint16
     f.write(u_zz.tobytes())
 
     # Write first value
-    f.write(pack_entry(VERTEX_DATA['vVertexCount'], zig_zag_encode(v[0])))
+    f.write(pack(VERTEX_DATA['vVertexCount'], zig_zag_encode(v[0])))
     # Write array. Must be uint16
     f.write(v_zz.tobytes())
 
     # Write first value
-    f.write(pack_entry(VERTEX_DATA['heightVertexCount'], zig_zag_encode(h[0])))
+    f.write(pack(VERTEX_DATA['heightVertexCount'], zig_zag_encode(h[0])))
     # Write array. Must be uint16
     f.write(h_zz.tobytes())
 
@@ -156,7 +150,7 @@ def write_indices(f, indices, n_vertices):
 
     # Write number of triangles to file
     n_triangles = int(len(indices) / 3)
-    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], n_triangles))
+    f.write(pack(NP_STRUCT_TYPES[np.uint32], n_triangles))
 
     # Encode indices using high water mark encoding
     encoded_ind = encode_indices(indices)
@@ -195,14 +189,14 @@ def write_edge_indices(f, positions, n_vertices):
     right = right.astype(dtype)
     top = top.astype(dtype)
 
-    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(left)))
+    f.write(pack(NP_STRUCT_TYPES[np.uint32], len(left)))
     f.write(left.tobytes())
 
-    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(bottom)))
+    f.write(pack(NP_STRUCT_TYPES[np.uint32], len(bottom)))
     f.write(bottom.tobytes())
 
-    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(right)))
+    f.write(pack(NP_STRUCT_TYPES[np.uint32], len(right)))
     f.write(right.tobytes())
 
-    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(top)))
+    f.write(pack(NP_STRUCT_TYPES[np.uint32], len(top)))
     f.write(top.tobytes())

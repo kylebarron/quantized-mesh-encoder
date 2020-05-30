@@ -1,15 +1,4 @@
-import gzip
-import io
-from struct import pack
 import numpy as np
-
-# from . import cartesian3d as c3d
-
-EPSILON6 = 0.000001
-
-
-def pack_entry(fmt, value):
-    return pack(fmt, value)
 
 
 def zig_zag_encode(arr):
