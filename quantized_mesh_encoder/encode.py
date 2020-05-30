@@ -160,7 +160,7 @@ def write_indices(f, indices, n_vertices):
         f.write(b)
 
     # Write number of triangles to file
-    n_triangles = len(indices) / 3
+    n_triangles = int(len(indices) / 3)
     f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], n_triangles))
 
     # Encode indices using high water mark encoding
@@ -194,6 +194,7 @@ def write_edge_indices(f, positions, n_vertices):
     index_32 = n_vertices > 65536
     dtype = np.uint32 if index_32 else np.uint16
 
+    # No high-water mark encoding on edge indices
     left = left.astype(dtype)
     bottom = bottom.astype(dtype)
     right = right.astype(dtype)
