@@ -1,6 +1,6 @@
 import numpy as np
 from .util import pack_entry, zig_zag_encode
-from constants import VERTEX_DATA, HEADER
+from constants import VERTEX_DATA, HEADER, NP_STRUCT_TYPES
 from util_cy import encode_indices
 
 # triangles
@@ -15,14 +15,15 @@ def encode(f, positions, indices):
     encode_header(f, data=None)
 
     # Convert to ndarray
-    positions = positions_reshape(positions)
+    positions = positions.reshape(-1, 3)
 
     # Linear interpolation to range u, v, h from 0-32767
     positions = interp_positions(positions)
 
-    write_vertices(f, positions)
+    n_vertices = max(positions.shape)
+    write_vertices(f, positions, n_vertices)
 
-    write_indices(f, indices)
+    write_indices(f, indices, n_vertices)
 
 
 def encode_header(f, data):
@@ -63,11 +64,6 @@ def encode_header(f, data):
             HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
 
 
-def positions_reshape(positions):
-    """Convert array to 3d ndarray"""
-    return positions.reshape(-1, 3)
-
-
 def interp_positions(positions, bounds=None):
     """Rescale positions to be integers ranging from min to max
 
@@ -98,10 +94,8 @@ def interp_positions(positions, bounds=None):
     return np.vstack([u, v, h]).T
 
 
-def write_vertices(f, positions):
+def write_vertices(f, positions, n_vertices):
     assert positions.ndim == 2, 'positions must be 2 dimensions'
-
-    n_vertices = max(positions.shape)
 
     # Write vertex count
     f.write(pack_entry(VERTEX_DATA['vertexCount'], n_vertices))
@@ -141,33 +135,39 @@ def write_vertices(f, positions):
     f.write(h_zz.tobytes())
 
 
-def write_indices(f, indices):
+def write_indices(f, indices, n_vertices):
     """Write indices to file
 
     """
-    # TODO whether to use 16 or 32 bits
-    indexData32 = True
+    # If more than 65536 vertices, index data must be uint32
+    index_32 = n_vertices > 65536
 
     # Enforce proper byte alignment
     # > padding is added before the IndexData to ensure 2 byte alignment for
     # > IndexData16 and 4 byte alignment for IndexData32.
-    required_offset = 4 if indexData32 else 2
+    required_offset = 4 if index_32 else 2
     remainder = f.tell() % required_offset
     if remainder:
         # number of bytes to add
         n_bytes = required_offset - remainder
-        # TODO write required number of bytes
+        # Write required number of bytes
+        # Not sure the best way to write empty bytes, so I'll just pad with
+        # ascii letters for now
+        b = ('a' * n_bytes).encode('ascii')
+        assert len(b) == n_bytes, 'Wrong number of bytes to pad'
+        f.write(b)
 
     # Write number of triangles to file
     n_triangles = len(indices) / 3
-    f.write(pack_entry(meta['triangleCount'], n_triangles))
+    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], n_triangles))
 
     # Encode indices using high water mark encoding
     encoded_ind = encode_indices(indices)
+
     # Write array. Must be either uint16 or uint32, depending on length of
     # vertices
-    if not indexData32:
-        encoded_ind = encoded_ind.astype(np.uint16)
+    dtype = np.uint32 if index_32 else np.uint16
+    encoded_ind = encoded_ind.astype(dtype)
     f.write(encoded_ind.tobytes())
 
     meta = TerrainTile.EdgeIndices16
