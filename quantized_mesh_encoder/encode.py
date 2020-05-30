@@ -1,6 +1,7 @@
 import numpy as np
 from .util import pack_entry, zig_zag_encode
 from constants import VERTEX_DATA, HEADER, NP_STRUCT_TYPES
+from util import zig_zag_encode
 from util_cy import encode_indices
 
 # triangles
@@ -111,15 +112,9 @@ def write_vertices(f, positions, n_vertices):
     h_diff = h[1:] - h[:-1]
 
     # Zig zag encode
-    # https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba
-    # (i >> bitlength-1) ^ (i << 1)
-    # So I right shift 15 because these arrays are int16
-    u_zz = np.bitwise_xor(np.right_shift(u_diff, 15), np.left_shift(
-        u_diff, 1)).astype(np.uint16)
-    v_zz = np.bitwise_xor(np.right_shift(v_diff, 15), np.left_shift(
-        v_diff, 1)).astype(np.uint16)
-    h_zz = np.bitwise_xor(np.right_shift(h_diff, 15), np.left_shift(
-        h_diff, 1)).astype(np.uint16)
+    u_zz = zig_zag_encode(u_diff).astype(np.uint16)
+    v_zz = zig_zag_encode(v_diff).astype(np.uint16)
+    h_zz = zig_zag_encode(h_diff).astype(np.uint16)
 
     # Write first value
     f.write(pack_entry(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))

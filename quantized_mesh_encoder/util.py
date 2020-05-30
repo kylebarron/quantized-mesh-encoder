@@ -1,6 +1,7 @@
 import gzip
 import io
 from struct import pack
+import numpy as np
 
 # from . import cartesian3d as c3d
 
@@ -11,38 +12,12 @@ def pack_entry(fmt, value):
     return pack(fmt, value)
 
 
-def zig_zag_encode(n):
+def zig_zag_encode(arr):
     """
-    ZigZag-Encodes a number:
-       -1 = 1
-       -2 = 3
-        0 = 0
-        1 = 2
-        2 = 4
+    Input can be number or numpy array
+
+    https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba
+    (i >> bitlength-1) ^ (i << 1)
+    So I right shift 15 because these arrays are int16
     """
-    return (n << 1) ^ (n >> 31)
-
-
-def signNotZero(v):
-    return -1.0 if v < 0.0 else 1.0
-
-
-def gzipFileObject(data):
-    compressed = io.BytesIO()
-    gz = gzip.GzipFile(fileobj=compressed, mode='wb', compresslevel=5)
-    gz.write(data.getvalue())
-    gz.close()
-    compressed.seek(0)
-    return compressed
-
-
-def getCoordsIndex(n, i):
-    return i + 1 if n - 1 != i else 0
-
-
-# Creates all the potential pairs of coords
-def createCoordsPairs(l):
-    coordsPairs = []
-    for i in range(0, len(l)):
-        coordsPairs.append([l[i], l[(i + 2) % len(l)]])
-    return coordsPairs
+    return np.bitwise_xor(np.right_shift(arr, 15), np.left_shift(arr, 1))
