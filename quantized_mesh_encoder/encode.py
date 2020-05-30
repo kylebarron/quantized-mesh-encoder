@@ -25,6 +25,8 @@ def encode(f, positions, indices):
 
     write_indices(f, indices, n_vertices)
 
+    write_edge_indices(f, positions, n_vertices)
+
 
 def encode_header(f, data):
     """Encode header data
@@ -170,22 +172,41 @@ def write_indices(f, indices, n_vertices):
     encoded_ind = encoded_ind.astype(dtype)
     f.write(encoded_ind.tobytes())
 
-    meta = TerrainTile.EdgeIndices16
-    if vertexCount > TerrainTile.BYTESPLIT:
-        meta = TerrainTile.EdgeIndices32
 
-    f.write(pack_entry(meta['westVertexCount'], len(self.westI)))
-    for wi in self.westI:
-        f.write(pack_entry(meta['westIndices'], wi))
+def find_edge_indices(positions):
+    u = positions[:, 0]
+    v = positions[:, 1]
 
-    f.write(pack_entry(meta['southVertexCount'], len(self.southI)))
-    for si in self.southI:
-        f.write(pack_entry(meta['southIndices'], si))
+    # np.where returns a tuple for each dimension
+    # Here we only care about the first
+    left = np.where(u == 0)[0]
+    bottom = np.where(v == 0)[0]
+    right = np.where(u == 32767)[0]
+    top = np.where(v == 32767)[0]
 
-    f.write(pack_entry(meta['eastVertexCount'], len(self.eastI)))
-    for ei in self.eastI:
-        f.write(pack_entry(meta['eastIndices'], ei))
+    return left, bottom, right, top
 
-    f.write(pack_entry(meta['northVertexCount'], len(self.northI)))
-    for ni in self.northI:
-        f.write(pack_entry(meta['northIndices'], ni))
+
+def write_edge_indices(f, positions, n_vertices):
+    left, bottom, right, top = find_edge_indices(positions)
+
+    # If more than 65536 vertices, index data must be uint32
+    index_32 = n_vertices > 65536
+    dtype = np.uint32 if index_32 else np.uint16
+
+    left = left.astype(dtype)
+    bottom = bottom.astype(dtype)
+    right = right.astype(dtype)
+    top = top.astype(dtype)
+
+    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(left)))
+    f.write(left.tobytes())
+
+    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(bottom)))
+    f.write(bottom.tobytes())
+
+    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(right)))
+    f.write(right.tobytes())
+
+    f.write(pack_entry(NP_STRUCT_TYPES[np.uint32], len(top)))
+    f.write(top.tobytes())
