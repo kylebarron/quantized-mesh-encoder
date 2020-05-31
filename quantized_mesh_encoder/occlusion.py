@@ -12,6 +12,7 @@ def compute_magnitude(positions, bounding_center):
     magnitude_squared = squared_norm(positions)
     magnitude = np.sqrt(magnitude_squared)
 
+    # Can make this cleaner by broadcasting division
     direction = positions.copy()
     direction[:, 0] /= magnitude
     direction[:, 1] /= magnitude
