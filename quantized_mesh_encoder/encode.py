@@ -2,23 +2,20 @@ from struct import pack
 
 import numpy as np
 
-from constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
-from util import zig_zag_encode
-from util_cy import encode_indices
-
-# triangles
-# vertices
-# positions[0]
-
-# triangles
-# indices = triangles
+from .bounding_sphere import bounding_sphere
+from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
+from .ecef import to_ecef
+from .occlusion import occlusion_point
+from .util import zig_zag_encode
+from .util_cy import encode_indices
 
 
 def encode(f, positions, indices):
-    encode_header(f, data=None)
-
     # Convert to ndarray
     positions = positions.reshape(-1, 3)
+
+    header = compute_header(positions)
+    encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
     positions = interp_positions(positions)
@@ -29,6 +26,37 @@ def encode(f, positions, indices):
     write_indices(f, indices, n_vertices)
 
     write_edge_indices(f, positions, n_vertices)
+
+
+def compute_header(positions):
+    header = {}
+    cartesian_positions = to_ecef(positions)
+
+    ecef_min_x = cartesian_positions[:, 0].min()
+    ecef_min_y = cartesian_positions[:, 1].min()
+    ecef_min_z = cartesian_positions[:, 2].min()
+    ecef_max_x = cartesian_positions[:, 0].max()
+    ecef_max_y = cartesian_positions[:, 1].max()
+    ecef_max_z = cartesian_positions[:, 2].max()
+
+    header['centerX'] = (ecef_min_x + ecef_max_x) / 2
+    header['centerY'] = (ecef_min_y + ecef_max_y) / 2
+    header['centerZ'] = (ecef_min_z + ecef_max_z) / 2
+
+    header['minimumHeight'] = positions[:, 2].min()
+    header['minimumHeight'] = positions[:, 2].max()
+
+    center, radius = bounding_sphere(cartesian_positions)
+    header['boundingSphereCenterX'] = center[0]
+    header['boundingSphereCenterY'] = center[1]
+    header['boundingSphereCenterZ'] = center[2]
+    header['boundingSphereRadius'] = radius
+
+    occl_pt = occlusion_point(cartesian_positions, center)
+    header['horizonOcclusionPointX'] = occl_pt[0]
+    header['horizonOcclusionPointY'] = occl_pt[1]
+    header['horizonOcclusionPointZ'] = occl_pt[2]
+    return header
 
 
 def encode_header(f, data):
