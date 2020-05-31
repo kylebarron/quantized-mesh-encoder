@@ -44,7 +44,7 @@ def compute_header(positions):
     header['centerZ'] = (ecef_min_z + ecef_max_z) / 2
 
     header['minimumHeight'] = positions[:, 2].min()
-    header['minimumHeight'] = positions[:, 2].max()
+    header['maximumHeight'] = positions[:, 2].max()
 
     center, radius = bounding_sphere(cartesian_positions)
     header['boundingSphereCenterX'] = center[0]
