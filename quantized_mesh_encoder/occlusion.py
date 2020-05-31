@@ -20,7 +20,7 @@ def compute_magnitude(positions, bounding_center):
     magnitude_squared = np.maximum(magnitude_squared, 1)
     magnitude = np.maximum(magnitude, 1)
 
-    cos_alpha = np.dot(direction, bounding_center.T)[:, 0]
+    cos_alpha = np.dot(direction, bounding_center.T)
     sin_alpha = np.linalg.norm(np.cross(direction, bounding_center), axis=1)
     cos_beta = 1 / magnitude
     sin_beta = np.sqrt(magnitude_squared - 1.0) * cos_beta
