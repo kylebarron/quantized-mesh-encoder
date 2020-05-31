@@ -28,24 +28,17 @@ def compute_magnitude(positions, bounding_center):
     return 1 / (cos_alpha * cos_beta - sin_alpha * sin_beta)
 
 
-def scale_ellipsoid(positions):
-    positions[:, 0] = positions[:, 0] / RADIUS_X
-    positions[:, 1] = positions[:, 1] / RADIUS_Y
-    positions[:, 2] = positions[:, 2] / RADIUS_Z
-
-    return positions
-
-
 # https://cesiumjs.org/2013/05/09/Computing-the-horizon-occlusion-point/
-def fromPoints(positions, bounding_center):
-    positions = scale_ellipsoid(positions)
+def occlusion_point(positions, bounding_center):
+    ellipsoid = np.array([RADIUS_X, RADIUS_Y, RADIUS_Z])
+    # Scale positions relative to ellipsoid
+    positions /= ellipsoid
 
-    # Make sure bounding center is a 2d array, so it can be scaled with same fn
-    bounding_center = bounding_center.reshape(-1, 3)
-    bounding_center = scale_ellipsoid(bounding_center)
+    # Scale center relative to ellipsoid
+    bounding_center /= ellipsoid
 
-    # Coerce back to a 1d array
-    bounding_center = bounding_center[0, :]
-
+    # Find magnitudes necessary for each position to not be visible
     magnitudes = compute_magnitude(positions, bounding_center)
-    return bounding_center * magnitudes.max()
+
+    # Multiply by maximum magnitude and rescale to ellipsoid surface
+    return bounding_center * magnitudes.max() * ellipsoid
