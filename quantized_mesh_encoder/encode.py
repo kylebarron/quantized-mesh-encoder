@@ -10,15 +10,15 @@ from .util import zig_zag_encode
 from .util_cy import encode_indices
 
 
-def encode(f, positions, indices):
+def encode(f, positions, indices, bounds=None):
     # Convert to ndarray
-    positions = positions.reshape(-1, 3)
+    positions = positions.reshape(-1, 3).astype(np.float32)
 
     header = compute_header(positions)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
-    positions = interp_positions(positions)
+    positions = interp_positions(positions, bounds=bounds)
 
     n_vertices = max(positions.shape)
     write_vertices(f, positions, n_vertices)
