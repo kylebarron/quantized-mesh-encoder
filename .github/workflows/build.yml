@@ -20,6 +20,9 @@ jobs:
         CIBW_BUILD: "pp3?-* cp3?-*"
         # Run before build
         CIBW_BEFORE_BUILD: python -m pip install numpy Cython
+        # CIBW_BEFORE_TEST: python -m pip install numpy Cython '.[test]'
+        # # run the package tests using `pytest`
+        # CIBW_TEST_COMMAND: pytest
 
     - uses: actions/setup-python@v1
       name: Install Python
@@ -37,9 +40,17 @@ jobs:
 
     - name: Build wheel
       run: |
-        python -m cibuildwheel --output-dir wheelhouse
+        python -m cibuildwheel --output-dir dist
 
     - uses: actions/upload-artifact@v1
       with:
         name: wheels
-        path: ./wheelhouse
+        path: ./dist
+
+    # https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+    - name: Publish distribution 📦 to PyPI
+      if: startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
