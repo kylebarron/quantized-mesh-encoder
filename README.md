@@ -21,14 +21,8 @@ mesh generation.
 ## Install
 
 ```
-pip install numpy Cython
 pip install quantized-mesh-encoder
 ```
-
-Cython is used internally, and currently only source builds are provided, so
-you'll need to have Cython and a C compiler available during installation.
-Additionally Numpy must already exist during install. Pull requests are welcome
-to package as platform-specific wheels.
 
 ## Using
 
