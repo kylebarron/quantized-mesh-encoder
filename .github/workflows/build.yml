@@ -17,7 +17,7 @@ jobs:
       uses: allenevans/set-env@v1.1.0
       with:
         # Only build on CPython and PyPy >=3
-        CIBW_BUILD: pp3?-* cp3?-*
+        CIBW_BUILD: "pp3?-* cp3?-*"
 
     - uses: actions/setup-python@v1
       name: Install Python
