@@ -1,5 +1,7 @@
 # quantized-mesh-encoder
 
+[![Build Status](https://travis-ci.org/kylebarron/quantized-mesh-encoder.svg?branch=master)](https://travis-ci.org/kylebarron/quantized-mesh-encoder)
+
 A fast Python Quantized Mesh encoder. Encodes a mesh with 100k coordinates and
 180k triangles in 20ms.
 
