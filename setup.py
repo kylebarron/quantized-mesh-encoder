@@ -23,7 +23,7 @@ def find_pyx(path='.'):
 
 setup(
     name="quantized-mesh-encoder",
-    version="0.1.0",
+    version="0.1.1",
     description="A fast Python Quantized Mesh encoder",
     long_description=readme,
     long_description_content_type="text/markdown",
