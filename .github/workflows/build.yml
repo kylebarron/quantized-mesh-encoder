@@ -18,6 +18,8 @@ jobs:
       with:
         # Only build on CPython and PyPy >=3
         CIBW_BUILD: "pp3?-* cp3?-*"
+        # Run before build
+        CIBW_BEFORE_BUILD: python -m pip install numpy Cython
 
     - uses: actions/setup-python@v1
       name: Install Python
@@ -35,7 +37,6 @@ jobs:
 
     - name: Build wheel
       run: |
-        python -m pip install numpy Cython
         python -m cibuildwheel --output-dir wheelhouse
 
     - uses: actions/upload-artifact@v1
