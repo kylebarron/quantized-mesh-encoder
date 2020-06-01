@@ -19,7 +19,7 @@ mesh generation.
 ## Install
 
 ```
-pip install numpy
+pip install numpy Cython
 pip install quantized-mesh-encoder
 ```
 
