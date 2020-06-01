@@ -1,0 +1,13 @@
+# Config file for automatic testing at travis-ci.org
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "3.6"
+  - "3.7"
+  - "3.8"
+install:
+  - pip install numpy
+  - pip install .
+
+script:
+  - pytest
