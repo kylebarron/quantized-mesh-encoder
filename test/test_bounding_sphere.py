@@ -52,3 +52,19 @@ def test_bounding_sphere_containment(positions):
 
     # All distances to the center must be <= the radius
     assert (distances <= radius).all(), 'A position outside bounding sphere'
+
+
+@pytest.mark.parametrize("positions", BOUNDING_SPHERE_CONTAINMENT_CASES)
+def test_bounding_sphere_containment_ritter(positions):
+    """
+    For each input of positions, creates a bounding sphere and then makes sure
+    that each point is inside the sphere.
+    """
+    positions = np.array(positions).reshape(-1, 3)
+    center, radius = bounding_sphere(positions, method='ritter')
+
+    # Distance from each point to the center
+    distances = np.linalg.norm(positions - center, axis=1)
+
+    # All distances to the center must be <= the radius
+    assert (distances <= radius).all(), 'A position outside bounding sphere'

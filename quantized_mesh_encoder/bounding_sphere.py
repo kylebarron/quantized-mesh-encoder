@@ -9,7 +9,10 @@ C code for Ritter's algorithm:
 http://www.realtimerendering.com/resources/GraphicsGems/gems/BoundSphere.c
 """
 import numpy as np
+from quantized_mesh_encoder.util_cy import ritter_second_pass
 
+def ritter_second_pass():
+    pass
 
 def bounding_sphere(positions, method='naive'):
     if method == 'naive':
@@ -20,7 +23,17 @@ def bounding_sphere(positions, method='naive'):
 
     raise ValueError('Invalid bounding sphere method')
 
+# positions.shape
+#
+# positions = cartesian_positions
+# %timeit bounding_sphere_ritter(positions)
+# %timeit bounding_sphere_ritter(positions)
 
+# %time test = bounding_sphere_ritter(positions)
+# %time test = bounding_sphere_ritter(positions)
+# %timeit
+# test1 = bounding_sphere_ritter(positions)
+# test2 = bounding_sphere_ritter(positions)
 def bounding_sphere_ritter(positions):
     """
     Implements Ritter's algorithm
@@ -61,7 +74,27 @@ def bounding_sphere_ritter(positions):
     center = (min_pt + max_pt) / 2
     radius = np.linalg.norm(max_pt - center)
 
-    # TODO: loop through points a second time, testing for containment in sphere
+    return ritter_second_pass(positions, center, radius)
+
+    # Next, each point P of S is tested for inclusion in the current ball (by
+    # simply checking that its distance from the center is less than or equal to
+    # the radius).
+    for position in positions:
+        dP = position - center
+
+        dist_to_center = np.linalg.norm(dP)
+        if dist_to_center <= radius:
+            continue
+
+        # Enlarge ball
+        # This is done by drawing a line from Pk+1 to the current center Ck of
+        # Bk and extending it further to intersect the far side of Bk.
+
+        # enlarge radius just enough
+        radius = (radius + dist_to_center) / 2
+
+        # shift center toward position
+        center += ((dist_to_center - radius) / dist_to_center) * dP
 
     return center, radius
 
