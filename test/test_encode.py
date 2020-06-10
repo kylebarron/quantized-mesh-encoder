@@ -52,8 +52,6 @@ def test_encode_decode():
         [0, 0, 0, 1, 1, 1, 0, 1, 4, 2, 3, 4, 8, 9, 10, 12, 13, 14],
         dtype=np.float32)
     triangles = np.array([0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5], dtype=np.uint32)
-    with open('test2.terrain', 'wb') as f:
-        encode(f, positions, triangles)
     f = BytesIO()
     encode(f, positions, triangles)
 
