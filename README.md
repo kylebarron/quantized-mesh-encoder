@@ -5,6 +5,14 @@
 A fast Python Quantized Mesh encoder. Encodes a mesh with 100k coordinates and
 180k triangles in 20ms.
 
+![](./assets/north_cascades.jpg)
+
+Mount Rainier and the central Cascades, using `quantized-mesh-encoder` in
+[`dem-tiler`][dem-tiler] for on-demand mesh generation and rendered with
+[deck.gl](https://deck.gl).
+
+[dem-tiler]: https://github.com/kylebarron/dem-tiler
+
 ## Overview
 
 [Quantized Mesh][quantized_mesh_spec] is a format to encode terrain meshes for
