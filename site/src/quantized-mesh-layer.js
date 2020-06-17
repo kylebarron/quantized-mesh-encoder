@@ -34,6 +34,7 @@ export function QuantizedMeshTerrainLayer(opts) {
     renderSubLayers,
     onViewportLoad,
     zRange,
+    refinementStrategy: "no-overlap",
   });
 }
 
