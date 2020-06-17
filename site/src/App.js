@@ -7,8 +7,9 @@ const INITIAL_VIEW_STATE = {
   latitude: 36.07091852096502,
   longitude: -112.00934837595949,
   bearing: -35.19642857142857,
-  pitch: 59.96603524054578,
+  pitch: 70,
   zoom: 13.574472859832357,
+  maxPitch: 89,
 };
 
 class App extends React.Component {
