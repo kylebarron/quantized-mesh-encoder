@@ -25,7 +25,7 @@ function quantizedMeshUrl(opts) {
 }
 
 export function QuantizedMeshTerrainLayer(opts) {
-  const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange} = opts || {};
+  const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange } = opts || {};
   return new TileLayer({
     id: "quantized-mesh-tile",
     minZoom,
@@ -59,6 +59,7 @@ function renderSubLayers(props) {
       getPosition: (d) => [0, 0, 0],
       // Color to use if surfaceImage is unavailable
       getColor: [200, 200, 200],
+      // wireframe: true,
     }),
   ];
 }

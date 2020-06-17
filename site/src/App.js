@@ -1,13 +1,14 @@
 import React from "react";
 import DeckGL from "@deck.gl/react";
 import { QuantizedMeshTerrainLayer } from "./quantized-mesh-layer";
+import InfoBox from "./info-box";
 import "./App.css";
 
 const INITIAL_VIEW_STATE = {
   latitude: 36.07091852096502,
   longitude: -112.00934837595949,
   bearing: -35.19642857142857,
-  pitch: 70,
+  pitch: 60,
   zoom: 13.574472859832357,
   maxPitch: 89,
 };
@@ -48,12 +49,15 @@ class App extends React.Component {
     ];
 
     return (
-      <DeckGL
-        initialViewState={viewState}
-        layers={layers}
-        onViewStateChange={(viewState) => this.setState({ viewState })}
-        controller={true}
-      />
+      <div>
+        <DeckGL
+          initialViewState={viewState}
+          layers={layers}
+          onViewStateChange={(viewState) => this.setState({ viewState })}
+          controller={true}
+        />
+        <InfoBox />
+      </div>
     );
   }
 }
