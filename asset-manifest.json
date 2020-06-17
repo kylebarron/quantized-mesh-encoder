@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css",
-    "main.js": "/quantized-mesh-encoder/static/js/main.ba392cf6.chunk.js",
-    "main.js.map": "/quantized-mesh-encoder/static/js/main.ba392cf6.chunk.js.map",
+    "main.js": "/quantized-mesh-encoder/static/js/main.e8ea2d94.chunk.js",
+    "main.js.map": "/quantized-mesh-encoder/static/js/main.e8ea2d94.chunk.js.map",
     "runtime-main.js": "/quantized-mesh-encoder/static/js/runtime-main.4f9177a6.js",
     "runtime-main.js.map": "/quantized-mesh-encoder/static/js/runtime-main.4f9177a6.js.map",
     "static/js/2.b25373b1.chunk.js": "/quantized-mesh-encoder/static/js/2.b25373b1.chunk.js",
     "static/js/2.b25373b1.chunk.js.map": "/quantized-mesh-encoder/static/js/2.b25373b1.chunk.js.map",
     "index.html": "/quantized-mesh-encoder/index.html",
-    "precache-manifest.9eebbd9d72ec1378cae236130b69a323.js": "/quantized-mesh-encoder/precache-manifest.9eebbd9d72ec1378cae236130b69a323.js",
+    "precache-manifest.548e533679fc3f39a08c842567a5bd36.js": "/quantized-mesh-encoder/precache-manifest.548e533679fc3f39a08c842567a5bd36.js",
     "service-worker.js": "/quantized-mesh-encoder/service-worker.js",
     "static/css/main.9ff4cda5.chunk.css.map": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css.map",
     "static/js/2.b25373b1.chunk.js.LICENSE.txt": "/quantized-mesh-encoder/static/js/2.b25373b1.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.4f9177a6.js",
     "static/js/2.b25373b1.chunk.js",
     "static/css/main.9ff4cda5.chunk.css",
-    "static/js/main.ba392cf6.chunk.js"
+    "static/js/main.e8ea2d94.chunk.js"
   ]
 }
