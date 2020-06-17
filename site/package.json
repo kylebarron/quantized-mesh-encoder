@@ -2,6 +2,7 @@
   "name": "site",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://kylebarron.dev/quantized-mesh-encoder",
   "dependencies": {
     "@loaders.gl/core": "2.2.0-alpha.2",
     "@loaders.gl/loader-utils": "2.2.0-alpha.2",
