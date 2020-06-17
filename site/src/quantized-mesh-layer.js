@@ -10,7 +10,7 @@ const DUMMY_DATA = [1];
 // Error suggestion from here
 // https://www.linkedin.com/pulse/fast-cesium-terrain-rendering-new-quantized-mesh-output-alvaro-huarte/
 function getMeshMaxError(z) {
-  return 77067.34 / (1 << z);
+  return (77067.34 / (1 << z)).toFixed(2);
 }
 
 function quantizedMeshUrl(opts) {
