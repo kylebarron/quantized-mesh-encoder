@@ -54,7 +54,7 @@ class App extends React.Component {
           initialViewState={viewState}
           layers={layers}
           onViewStateChange={(viewState) => this.setState({ viewState })}
-          controller={true}
+          controller={{ touchRotate: true }}
         />
         <InfoBox />
       </div>
