@@ -9,7 +9,7 @@ A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
 
 [![](./assets/no-texture-example.jpg)][example]
 
-Mount Rainier and the central Cascades, using `quantized-mesh-encoder` in
+The Grand Canyon and Walhalla Plateau, using `quantized-mesh-encoder` in
 [`dem-tiler`][dem-tiler] for on-demand mesh generation and rendered with
 [deck.gl](https://deck.gl).
 
