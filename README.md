@@ -5,14 +5,17 @@
 A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
 100k coordinates and 180k triangles in 20ms. [Example viewer][example].
 
+[![][image_url]][example]
+
+[image_url]: https://raw.githubusercontent.com/kylebarron/quantized-mesh-encoder/master/assets/no-texture-example.jpg
 [example]: https://kylebarron.dev/quantized-mesh-encoder
 
-[![](./assets/no-texture-example.jpg)][example]
-
-The Grand Canyon and Walhalla Plateau, using `quantized-mesh-encoder` in
-[`dem-tiler`][dem-tiler] for on-demand mesh generation and rendered with
+The Grand Canyon and Walhalla Plateau. The mesh is created using
+[`pymartini`][pymartini], encoded using `quantized-mesh-encoder`, served
+on-demand using [`dem-tiler`][dem-tiler], and rendered with
 [deck.gl](https://deck.gl).
 
+[pymartini]: https://github.com/kylebarron/pymartini
 [dem-tiler]: https://github.com/kylebarron/dem-tiler
 
 ## Overview
