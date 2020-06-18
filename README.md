@@ -7,7 +7,7 @@ A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
 
 [example]: https://kylebarron.dev/quantized-mesh-encoder
 
-![](./assets/north_cascades.jpg)
+[![](./assets/no-texture-example.jpg)][example]
 
 Mount Rainier and the central Cascades, using `quantized-mesh-encoder` in
 [`dem-tiler`][dem-tiler] for on-demand mesh generation and rendered with
