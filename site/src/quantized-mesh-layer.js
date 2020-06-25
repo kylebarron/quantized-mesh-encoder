@@ -1,12 +1,10 @@
-// import { TileLayer } from "@deck.gl/geo-layers";
+import { TileLayer } from "@deck.gl/geo-layers";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import { load } from "@loaders.gl/core";
 // import { QuantizedMeshLoader } from "@loaders.gl/terrain";
 import { QuantizedMeshLoader } from "./quantized-mesh/quantized-mesh-loader";
 import { Matrix4 } from "math.gl";
-// Temporary until deck.gl 8.2 is released
-import TileLayer from "./tile-layer/tile-layer";
 
 const DUMMY_DATA = [1];
 
@@ -52,8 +50,6 @@ function renderSubLayers(props) {
 
   return [
     new SimpleMeshLayer(props, {
-      // NOTE: currently you need to set each sublayer id so they don't conflict
-      id: `terrain-simple-mesh-layer-${props.id}`,
       data: DUMMY_DATA,
       mesh: data,
       getPolygonOffset: null,

@@ -51,9 +51,9 @@ class App extends React.Component {
     return (
       <div>
         <DeckGL
-          initialViewState={viewState}
+          viewState={viewState}
           layers={layers}
-          onViewStateChange={(viewState) => this.setState({ viewState })}
+          onViewStateChange={({ viewState }) => this.setState({ viewState })}
           controller={{ touchRotate: true }}
         />
         <InfoBox />
