@@ -1,11 +1,9 @@
-// import { TileLayer } from "@deck.gl/geo-layers";
+import { TileLayer } from "@deck.gl/geo-layers";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import { load } from "@loaders.gl/core";
 import { QuantizedMeshLoader } from "@loaders.gl/terrain";
 import { Matrix4 } from "math.gl";
-// Temporary until deck.gl 8.2 is released
-import TileLayer from "./tile-layer/tile-layer";
 
 const DUMMY_DATA = [1];
 
