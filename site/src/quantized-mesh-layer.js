@@ -49,8 +49,6 @@ function renderSubLayers(props) {
 
   return [
     new SimpleMeshLayer(props, {
-      // NOTE: currently you need to set each sublayer id so they don't conflict
-      id: `terrain-simple-mesh-layer-${tile.x}-${tile.y}-${tile.z}`,
       data: DUMMY_DATA,
       mesh: data,
       getPolygonOffset: null,
