@@ -22,7 +22,7 @@ on-demand using [`dem-tiler`][dem-tiler], and rendered with
 
 [Quantized Mesh][quantized_mesh_spec] is a format to encode terrain meshes for
 efficient client-side terrain rendering. Such files are supported in
-[Cesium][cesium] and [deck.gl][deck.gl] (as of release 8.2, expected July 2020.)
+[Cesium][cesium] and [deck.gl][deck.gl] (as of version 8.2).
 
 This library is designed to support performant server-side on-demand terrain
 mesh generation.
