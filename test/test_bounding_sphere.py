@@ -60,7 +60,7 @@ def test_bounding_sphere_containment_ritter(positions):
     For each input of positions, creates a bounding sphere and then makes sure
     that each point is inside the sphere.
     """
-    positions = np.array(positions).reshape(-1, 3)
+    positions = np.array(positions).reshape(-1, 3).astype(np.float32)
     center, radius = bounding_sphere(positions, method='ritter')
 
     # Distance from each point to the center
