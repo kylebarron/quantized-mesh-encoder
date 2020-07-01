@@ -2,8 +2,21 @@
 
 [![Build Status](https://travis-ci.org/kylebarron/quantized-mesh-encoder.svg?branch=master)](https://travis-ci.org/kylebarron/quantized-mesh-encoder)
 
-A fast Python Quantized Mesh encoder. Encodes a mesh with 100k coordinates and
-180k triangles in 20ms.
+A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
+100k coordinates and 180k triangles in 20ms. [Example viewer][example].
+
+[![][image_url]][example]
+
+[image_url]: https://raw.githubusercontent.com/kylebarron/quantized-mesh-encoder/master/assets/no-texture-example.jpg
+[example]: https://kylebarron.dev/quantized-mesh-encoder
+
+The Grand Canyon and Walhalla Plateau. The mesh is created using
+[`pymartini`][pymartini], encoded using `quantized-mesh-encoder`, served
+on-demand using [`dem-tiler`][dem-tiler], and rendered with
+[deck.gl](https://deck.gl).
+
+[pymartini]: https://github.com/kylebarron/pymartini
+[dem-tiler]: https://github.com/kylebarron/dem-tiler
 
 ## Overview
 
@@ -87,14 +100,38 @@ was designed to be used with [`pymartini`][pymartini], a fast elevation
 heightmap to terrain mesh generator.
 
 ```py
-martini = Martini(257)
-# generate RTIN hierarchy from terrain data (an array of size^2 length)
+import quantized_mesh_encoder
+from imageio import imread
+from pymartini import decode_ele, Martini, rescale_positions
+import mercantile
+
+png = imread(png_path)
+terrain = decode_ele(png, 'terrarium')
+terrain = terrain.T
+martini = Martini(png.shape[0] + 1)
 tile = martini.create_tile(terrain)
-# get a mesh (vertices and triangles indices) for a 10m error
 vertices, triangles = tile.get_mesh(10)
-buf = BytesIO()
-encode(buf, vertices, triangles)
+
+# Use mercantile to find the bounds in WGS84 of this tile
+bounds = mercantile.bounds(mercantile.Tile(x, y, z))
+
+# Rescale positions to WGS84
+rescaled = rescale_positions(
+    vertices,
+    terrain,
+    bounds=bounds,
+    flip_y=True
+)
+
+with BytesIO() as f:
+    quantized_mesh_encoder.encode(f, rescaled, triangles)
+    f.seek(0)
+    return ("OK", "application/vnd.quantized-mesh", f.read())
 ```
+
+You can also look at the source of
+[`_mesh()`](https://github.com/kylebarron/dem-tiler/blob/5b50a216a014eb32febee84fe3063ca99e71c7f6/dem_tiler/handlers/app.py#L234)
+in [`dem-tiler`][dem-tiler] for a working reference.
 
 ## License
 
