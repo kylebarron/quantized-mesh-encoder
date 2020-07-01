@@ -25,6 +25,21 @@ function quantizedMeshUrl(opts) {
   return baseUrl + searchParams.toString();
 }
 
+const MOSAIC_URL =
+  "dynamodb://us-west-2/94c61bd217e1211db47cf7f8b95bbc8e5e7d68a26cd9099319cf15f9";
+
+function naipUrl({x, y, z, mosaicUrl}) {
+  // Do saturation client side for speed
+  // const color_ops = "sigmoidal RGB 4 0.5, saturation 1.25";
+  const params = {
+    url: mosaicUrl,
+  };
+  const searchParams = new URLSearchParams(params);
+  let baseUrl = `https://us-west-2-lambda.kylebarron.dev/naip/${z}/${x}/${y}.jpg?`;
+  return baseUrl + searchParams.toString();
+}
+
+
 export function QuantizedMeshTerrainLayer(opts) {
   const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange } = opts || {};
   return new TileLayer({
@@ -40,18 +55,33 @@ export function QuantizedMeshTerrainLayer(opts) {
 }
 
 async function getTileData({ x, y, z }) {
+  const textureUrl = naipUrl({ x, y, z, mosaicUrl: MOSAIC_URL });
+  const surface = textureUrl
+    ? // If surface image fails to load, the tile should still be displayed
+      load(textureUrl).catch((_) => null)
+    : Promise.resolve(null);
+
   const meshMaxError = getMeshMaxError(z);
   const terrainUrl = quantizedMeshUrl({ x, y, z, meshMaxError });
-  return load(terrainUrl, QuantizedMeshLoader, {worker: false});
+  const terrain = load(terrainUrl, QuantizedMeshLoader, { worker: false });
+
+  return Promise.all([terrain, surface]);
 }
 
 function renderSubLayers(props) {
   const { data, tile } = props;
 
+  if (!data) {
+    return null;
+  }
+
+  const [mesh, texture] = data;
+
   return [
     new SimpleMeshLayer(props, {
       data: DUMMY_DATA,
-      mesh: data,
+      mesh,
+      texture,
       getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       modelMatrix: getModelMatrix(tile),
