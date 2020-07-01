@@ -45,7 +45,7 @@ pip install quantized-mesh-encoder
 
 Parameters:
 
-- `f`: a file object in which to write encoded bytes
+- `f`: a writable file-like object in which to write encoded bytes
 - `positions`: (`array[float]`): a flat Numpy array of 3D positions.
 - `indices` (`array[int]`): a flat Numpy array indicating triples of coordinates
   from `positions` to make triangles. For example, if the first three values of
@@ -53,6 +53,34 @@ Parameters:
   9 values in `positions`, three for the first vertex (index `0`), three for the
   second vertex, and three for the third vertex.
 - `bounds` (`List[float]`, optional): a list of bounds, `[minx, miny, maxx, maxy]`. By default, inferred as the minimum and maximum values of `positions`.
+- `sphere_method` (`str`, optional): As part of the header information when
+  encoding Quantized Mesh, it's necessary to compute a [_bounding
+  sphere_][bounding_sphere], which contains all positions of the mesh.
+  `sphere_method` designates the algorithm to use for creating the bounding
+  sphere. Must be one of `'bounding_box'`, `'naive'`, `'ritter'` or `None`.
+  Default is `None`.
+    - `'bounding_box'`: Finds the bounding box of all positions, then defines
+      the center of the sphere as the center of the bounding box, and defines
+      the radius as the distance back to the corner. This method produces the
+      largest bounding sphere, but is the fastest: roughly 70 µs on my computer.
+    - `'naive'`: Finds the bounding box of all positions, then defines the
+      center of the sphere as the center of the bounding box. It then checks the
+      distance to every other point and defines the radius as the maximum of
+      these distances. This method will produce a slightly smaller bounding
+      sphere than the `bounding_box` method when points are not in the 3D
+      corners. This is the next fastest at roughly 160 µs on my computer.
+    - `'ritter'`: Implements the Ritter Method for bounding spheres. It first
+      finds the center of the longest span, then checks every point for
+      containment, enlarging the sphere if necessary. This _can_ produce smaller
+      bounding spheres than the naive method, but it does not always, so often
+      both are run, see next option. This is the slowest method, at roughly 300
+      µs on my computer.
+    - `None`: Runs both the naive and the ritter methods, then returns the
+      smaller of the two. Since this runs both algorithms, it takes around 500
+      µs on my computer
+
+
+[bounding_sphere]: https://en.wikipedia.org/wiki/Bounding_sphere
 
 ### Examples
 

@@ -11,7 +11,7 @@ def test_compute_header():
     positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4], dtype=np.float32).reshape(
         -1, 3)
 
-    header = compute_header(positions)
+    header = compute_header(positions, sphere_method=None)
     keys = [
         'centerX', 'centerY', 'centerZ', 'minimumHeight', 'maximumHeight',
         'boundingSphereCenterX', 'boundingSphereCenterY',
