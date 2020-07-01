@@ -20,19 +20,23 @@ def encode_indices(indices):
 
     return np.asarray(out_view, dtype=np.uint32)
 
+
 def ritter_second_pass(
     np.ndarray[np.float32_t, ndim=2] positions,
     np.ndarray[np.float32_t, ndim=1] center,
     float radius):
 
     cdef np.float32_t[:] dP
-    cdef float dist, dist2
+    cdef float dist, dist2, mult
     cdef Py_ssize_t i
     cdef float radius2 = radius ** 2
 
     cdef float centerX = center[0]
     cdef float centerY = center[1]
     cdef float centerZ = center[2]
+
+    cdef float x, y, z
+    cdef float dPx, dPy, dPz
 
     # Next, each point P of S is tested for inclusion in the current ball (by
     # simply checking that its distance from the center is less than or equal to
