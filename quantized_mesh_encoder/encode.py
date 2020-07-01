@@ -4,17 +4,58 @@ import numpy as np
 
 from .bounding_sphere import bounding_sphere
 from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
-from .ecef import to_ecef
+from quantized_mesh_encoder.ecef import to_ecef
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
 
-def encode(f, positions, indices, bounds=None):
+def encode(f, positions, indices, bounds=None, sphere_method=None):
+    """Create bounding sphere from positions
+
+    Args:
+        - f: a writable file-like object in which to write encoded bytes
+        - positions: (array[float]): a flat Numpy array of 3D positions.
+        - indices (array[int]): a flat Numpy array indicating triples of
+          coordinates from `positions` to make triangles. For example, if the
+          first three values of `indices` are `0`, `1`, `2`, then that defines a
+          triangle formed by the first 9 values in `positions`, three for the
+          first vertex (index `0`), three for the second vertex, and three for
+          the third vertex.
+        - bounds (List[float], optional): a list of bounds, `[minx, miny, maxx,
+          maxy]`. By default, inferred as the minimum and maximum values of
+          `positions`.
+        - sphere_method: a string designating the algorithm to use for creating
+          the bounding sphere. Must be one of `'bounding_box'`, `'naive'`,
+          `'ritter'` or `None`.
+
+          - bounding_box: Finds the bounding box of all positions, then defines
+            the center of the sphere as the center of the bounding box, and
+            defines the radius as the distance back to the corner. This method
+            produces the largest bounding sphere, but is the fastest: roughly 70
+            µs on my computer.
+          - naive: Finds the bounding box of all positions, then defines the
+            center of the sphere as the center of the bounding box. It then
+            checks the distance to every other point and defines the radius as
+            the maximum of these distances. This method will produce a slightly
+            smaller bounding sphere than the `bounding_box` method when points
+            are not in the 3D corners. This is the next fastest at roughly 160
+            µs on my computer.
+          - ritter: Implements the Ritter Method for bounding spheres. It first
+            finds the center of the longest span, then checks every point for
+            containment, enlarging the sphere if necessary. This _can_ produce
+            smaller bounding spheres than the naive method, but it does not
+            always, so often both are run, see next option. This is the slowest
+            method, at roughly 300 µs on my computer.
+          - None: Runs both the naive and the ritter methods, then returns the
+            smaller of the two. Since this runs both algorithms, it takes around
+            500 µs on my computer
+    """
+
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
 
-    header = compute_header(positions)
+    header = compute_header(positions, sphere_method)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
@@ -28,7 +69,7 @@ def encode(f, positions, indices, bounds=None):
     write_edge_indices(f, positions, n_vertices)
 
 
-def compute_header(positions):
+def compute_header(positions, sphere_method):
     header = {}
     cartesian_positions = to_ecef(positions)
 
@@ -46,7 +87,7 @@ def compute_header(positions):
     header['minimumHeight'] = positions[:, 2].min()
     header['maximumHeight'] = positions[:, 2].max()
 
-    center, radius = bounding_sphere(cartesian_positions)
+    center, radius = bounding_sphere(cartesian_positions, sphere_method)
     header['boundingSphereCenterX'] = center[0]
     header['boundingSphereCenterY'] = center[1]
     header['boundingSphereCenterZ'] = center[2]
