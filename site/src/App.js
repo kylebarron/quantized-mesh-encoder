@@ -26,8 +26,8 @@ class App extends React.Component {
     }
 
     const { zRange } = this.state;
-    const ranges = data.map((arr) => {
-      const bounds = arr.header.boundingBox;
+    const ranges = data.filter(Boolean).map((arr) => {
+      const bounds = arr[0].header.boundingBox;
       return bounds.map((bound) => bound[2]);
     });
     const minZ = Math.min(...ranges.map((x) => x[0]));
