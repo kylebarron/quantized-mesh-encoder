@@ -20,7 +20,7 @@ def test_bounding_sphere_unit_cube():
         1, 1, 1,
     ]  # yapf: disable
 
-    cube = np.array(positions).reshape(-1, 3)
+    cube = np.array(positions).reshape(-1, 3).astype(np.float32)
     center, radius = bounding_sphere(cube)
     assert np.isclose(np.array([0, 0, 0]), center).all(), 'Incorrect center'
     assert np.isclose(np.sqrt(3), radius), 'Incorrect radius'
@@ -44,7 +44,7 @@ def test_bounding_sphere_containment(positions):
     For each input of positions, creates a bounding sphere and then makes sure
     that each point is inside the sphere.
     """
-    positions = np.array(positions).reshape(-1, 3)
+    positions = np.array(positions).reshape(-1, 3).astype(np.float32)
     center, radius = bounding_sphere(positions)
 
     # Distance from each point to the center
