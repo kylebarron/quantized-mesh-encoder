@@ -12,7 +12,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        # macos seems to be failing; see https://github.com/joerick/cibuildwheel/issues/402
+        # os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-18.04, windows-latest]
 
     steps:
     - uses: actions/checkout@v1
