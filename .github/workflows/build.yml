@@ -12,9 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos seems to be failing; see https://github.com/joerick/cibuildwheel/issues/402
-        # os: [ubuntu-18.04, windows-latest, macos-latest]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -22,8 +20,9 @@ jobs:
     - name: set environment variables
       uses: allenevans/set-env@v1.1.0
       with:
-        # Only build on CPython and PyPy >=3
-        CIBW_BUILD: "pp3?-* cp3?-*"
+        # Only build on CPython
+        # PyPy on macos seems to be failing; see https://github.com/joerick/cibuildwheel/issues/402
+        CIBW_BUILD: "cp3?-*"
         # Run before build
         CIBW_BEFORE_BUILD: python -m pip install numpy Cython
         # CIBW_BEFORE_TEST: python -m pip install numpy Cython '.[test]'
