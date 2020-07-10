@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.2] - 2020-07-10
+
+- Don't build wheels for PyPy. See https://github.com/joerick/cibuildwheel/issues/402
+
 ## [0.2.1] - 2020-07-09
 
 - Try to rebuild wheels
