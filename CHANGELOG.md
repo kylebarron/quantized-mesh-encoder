@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.1] - 2020-07-09
+
+- Try to rebuild wheels
+
 ## [0.2.0] - 2020-07-01
 
 - New methods for creating a bounding sphere. #10
