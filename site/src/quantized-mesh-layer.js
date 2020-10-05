@@ -4,6 +4,7 @@ import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import { load } from "@loaders.gl/core";
 import { QuantizedMeshLoader } from "@loaders.gl/terrain";
 import { Matrix4 } from "math.gl";
+import {ImageLoader} from '@loaders.gl/images'
 
 const DUMMY_DATA = [1];
 
@@ -12,6 +13,21 @@ const DUMMY_DATA = [1];
 function getMeshMaxError(z) {
   return (77067.34 / (1 << z)).toFixed(2);
 }
+
+function getNaipUrl({x, y, z}) {
+  const mosaicUrl =
+    "dynamodb://us-west-2/94c61bd217e1211db47cf7f8b95bbc8e5e7d68a26cd9099319cf15f9";
+  // Do saturation client side for speed
+  const color_ops = "sigmoidal RGB 4 0.5, saturation 1.25";
+  const params = {
+    url: mosaicUrl,
+    color_ops,
+  };
+  const searchParams = new URLSearchParams(params);
+  let baseUrl = `https://us-west-2-lambda.kylebarron.dev/naip/${z}/${x}/${y}.jpg?`;
+  return baseUrl + searchParams.toString();
+}
+
 
 function quantizedMeshUrl(opts) {
   const { x, y, z, mosaicUrl = "terrarium", meshMaxError = 10 } = opts;
@@ -41,16 +57,26 @@ export function QuantizedMeshTerrainLayer(opts) {
 async function getTileData({ x, y, z }) {
   const meshMaxError = getMeshMaxError(z);
   const terrainUrl = quantizedMeshUrl({ x, y, z, meshMaxError });
-  return load(terrainUrl, QuantizedMeshLoader);
+  const terrain = load(terrainUrl, QuantizedMeshLoader);
+
+  const naipUrl = getNaipUrl({x, y, z});
+  const image = load(naipUrl, ImageLoader);
+  return Promise.all([terrain, image])
 }
 
 function renderSubLayers(props) {
   const { data, tile } = props;
+  if (!data) {
+    return null;
+  }
+
+  const [mesh, texture] = data;
 
   return [
     new SimpleMeshLayer(props, {
       data: DUMMY_DATA,
-      mesh: data,
+      mesh,
+      texture,
       getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       modelMatrix: getModelMatrix(tile),
