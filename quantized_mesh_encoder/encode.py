@@ -4,7 +4,7 @@ import numpy as np
 
 from .bounding_sphere import bounding_sphere
 from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
-from quantized_mesh_encoder.ecef import to_ecef
+from .ecef import to_ecef
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
@@ -15,13 +15,14 @@ def encode(f, positions, indices, bounds=None, sphere_method=None):
 
     Args:
         - f: a writable file-like object in which to write encoded bytes
-        - positions: (array[float]): a flat Numpy array of 3D positions.
-        - indices (array[int]): a flat Numpy array indicating triples of
-          coordinates from `positions` to make triangles. For example, if the
-          first three values of `indices` are `0`, `1`, `2`, then that defines a
-          triangle formed by the first 9 values in `positions`, three for the
-          first vertex (index `0`), three for the second vertex, and three for
-          the third vertex.
+        - positions: (ndarray[float]): either a 1D Numpy array or a 2D Numpy
+          array of shape (-1, 3) containing 3D positions.
+        - indices (ndarray[int]): either a 1D Numpy array or a 2D Numpy array of
+          shape (-1, 3) indicating triples of coordinates from `positions` to
+          make triangles. For example, if the first three values of `indices`
+          are `0`, `1`, `2`, then that defines a triangle formed by the first 9
+          values in `positions`, three for the first vertex (index `0`), three
+          for the second vertex, and three for the third vertex.
         - bounds (List[float], optional): a list of bounds, `[minx, miny, maxx,
           maxy]`. By default, inferred as the minimum and maximum values of
           `positions`.
@@ -54,6 +55,7 @@ def encode(f, positions, indices, bounds=None, sphere_method=None):
 
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
+    indices = indices.reshape(-1, 3).astype(np.uint32)
 
     header = compute_header(positions, sphere_method)
     encode_header(f, header)
@@ -61,7 +63,7 @@ def encode(f, positions, indices, bounds=None, sphere_method=None):
     # Linear interpolation to range u, v, h from 0-32767
     positions = interp_positions(positions, bounds=bounds)
 
-    n_vertices = max(positions.shape)
+    n_vertices = positions.shape[0]
     write_vertices(f, positions, n_vertices)
 
     write_indices(f, indices, n_vertices)
@@ -218,11 +220,11 @@ def write_indices(f, indices, n_vertices):
         f.write(b)
 
     # Write number of triangles to file
-    n_triangles = int(len(indices) / 3)
+    n_triangles = indices.shape[0]
     f.write(pack(NP_STRUCT_TYPES[np.uint32], n_triangles))
 
     # Encode indices using high water mark encoding
-    encoded_ind = encode_indices(indices)
+    encoded_ind = encode_indices(indices.flatten())
 
     # Write array. Must be either uint16 or uint32, depending on length of
     # vertices

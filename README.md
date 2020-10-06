@@ -46,13 +46,16 @@ pip install quantized-mesh-encoder
 Parameters:
 
 - `f`: a writable file-like object in which to write encoded bytes
-- `positions`: (`array[float]`): a flat Numpy array of 3D positions.
-- `indices` (`array[int]`): a flat Numpy array indicating triples of coordinates
-  from `positions` to make triangles. For example, if the first three values of
-  `indices` are `0`, `1`, `2`, then that defines a triangle formed by the first
-  9 values in `positions`, three for the first vertex (index `0`), three for the
-  second vertex, and three for the third vertex.
-- `bounds` (`List[float]`, optional): a list of bounds, `[minx, miny, maxx, maxy]`. By default, inferred as the minimum and maximum values of `positions`.
+- `positions`: (`array[float]`): either a 1D Numpy array or a 2D Numpy array of
+  shape `(-1, 3)` containing 3D positions.
+- `indices` (`array[int]`): either a 1D Numpy array or a 2D Numpy array of shape
+  `(-1, 3)` indicating triples of coordinates from `positions` to make
+  triangles. For example, if the first three values of `indices` are `0`, `1`,
+  `2`, then that defines a triangle formed by the first 9 values in `positions`,
+  three for the first vertex (index `0`), three for the second vertex, and three
+  for the third vertex.
+- `bounds` (`List[float]`, optional): a list of bounds, `[minx, miny, maxx,
+  maxy]`. By default, inferred as the minimum and maximum values of `positions`.
 - `sphere_method` (`str`, optional): As part of the header information when
   encoding Quantized Mesh, it's necessary to compute a [_bounding
   sphere_][bounding_sphere], which contains all positions of the mesh.
