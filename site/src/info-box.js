@@ -97,7 +97,7 @@ export default function InfoBox(props) {
 
             <Checkbox
               label="Overlay satellite imagery"
-              value={loadTexture}
+              checked={loadTexture}
               onClick={(event, { checked }) =>
                 onChange({ loadTexture: checked })
               }
