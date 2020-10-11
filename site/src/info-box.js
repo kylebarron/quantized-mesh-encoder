@@ -75,8 +75,7 @@ export default function InfoBox(props) {
               >
                 <code>deck.gl</code>
               </a>{" "}
-              for rendering. You can also easily overlay a texture source, e.g.
-              Mapbox Satellite tiles, with deck.gl.{" "}
+              for rendering.{" "}
               <a
                 target="_blank"
                 rel="noopener noreferrer"
