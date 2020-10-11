@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "a38b3d0395ad77eae53aed8586189122",
+    "revision": "9134eab833be03f92276632380ed5421",
     "url": "/quantized-mesh-encoder/index.html"
   },
   {
-    "revision": "4b143d21d469bb048f7e",
+    "revision": "6f344e9e01a9260ecf7c",
     "url": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/quantized-mesh-encoder/static/js/2.24e7c51c.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "4b143d21d469bb048f7e",
-    "url": "/quantized-mesh-encoder/static/js/main.ba60a92c.chunk.js"
+    "revision": "6f344e9e01a9260ecf7c",
+    "url": "/quantized-mesh-encoder/static/js/main.fee54ad9.chunk.js"
   },
   {
     "revision": "01aa5fa017b936421e3b",
