@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/quantized-mesh-encoder/precache-manifest.9120eb3ce5ccfb8047937910ae16fadf.js"
+  "/quantized-mesh-encoder/precache-manifest.33b9550fe684efc4f5163c9d8d86296d.js"
 );
 
 self.addEventListener('message', (event) => {
