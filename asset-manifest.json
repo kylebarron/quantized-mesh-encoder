@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css",
-    "main.js": "/quantized-mesh-encoder/static/js/main.6bd63cfd.chunk.js",
-    "main.js.map": "/quantized-mesh-encoder/static/js/main.6bd63cfd.chunk.js.map",
+    "main.js": "/quantized-mesh-encoder/static/js/main.a4180c85.chunk.js",
+    "main.js.map": "/quantized-mesh-encoder/static/js/main.a4180c85.chunk.js.map",
     "runtime-main.js": "/quantized-mesh-encoder/static/js/runtime-main.668b1ea7.js",
     "runtime-main.js.map": "/quantized-mesh-encoder/static/js/runtime-main.668b1ea7.js.map",
-    "static/js/2.dded0d9c.chunk.js": "/quantized-mesh-encoder/static/js/2.dded0d9c.chunk.js",
-    "static/js/2.dded0d9c.chunk.js.map": "/quantized-mesh-encoder/static/js/2.dded0d9c.chunk.js.map",
+    "static/js/2.f22d1c7b.chunk.js": "/quantized-mesh-encoder/static/js/2.f22d1c7b.chunk.js",
+    "static/js/2.f22d1c7b.chunk.js.map": "/quantized-mesh-encoder/static/js/2.f22d1c7b.chunk.js.map",
     "index.html": "/quantized-mesh-encoder/index.html",
-    "precache-manifest.66197e8a56654a066fbff8ab202c4867.js": "/quantized-mesh-encoder/precache-manifest.66197e8a56654a066fbff8ab202c4867.js",
+    "precache-manifest.1d57ab4be25ce1b7902309fd6c55af35.js": "/quantized-mesh-encoder/precache-manifest.1d57ab4be25ce1b7902309fd6c55af35.js",
     "service-worker.js": "/quantized-mesh-encoder/service-worker.js",
     "static/css/main.9ff4cda5.chunk.css.map": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css.map",
-    "static/js/2.dded0d9c.chunk.js.LICENSE.txt": "/quantized-mesh-encoder/static/js/2.dded0d9c.chunk.js.LICENSE.txt"
+    "static/js/2.f22d1c7b.chunk.js.LICENSE.txt": "/quantized-mesh-encoder/static/js/2.f22d1c7b.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.668b1ea7.js",
-    "static/js/2.dded0d9c.chunk.js",
+    "static/js/2.f22d1c7b.chunk.js",
     "static/css/main.9ff4cda5.chunk.css",
-    "static/js/main.6bd63cfd.chunk.js"
+    "static/js/main.a4180c85.chunk.js"
   ]
 }

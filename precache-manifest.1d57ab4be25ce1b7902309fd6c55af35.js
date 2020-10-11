@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "0a9ce23f121d83278ead1caeae454b6e",
+    "revision": "61a4b2261b63fd9c511815a27f87133a",
     "url": "/quantized-mesh-encoder/index.html"
   },
   {
-    "revision": "9b85f3528c80b1e44625",
+    "revision": "e592bc22f1d8bf157c98",
     "url": "/quantized-mesh-encoder/static/css/main.9ff4cda5.chunk.css"
   },
   {
-    "revision": "c80638d57ac10bb80268",
-    "url": "/quantized-mesh-encoder/static/js/2.dded0d9c.chunk.js"
+    "revision": "ec953ed62474a74c59b8",
+    "url": "/quantized-mesh-encoder/static/js/2.f22d1c7b.chunk.js"
   },
   {
     "revision": "3523e4cff3dec7be56dd2b959fadaa1a",
-    "url": "/quantized-mesh-encoder/static/js/2.dded0d9c.chunk.js.LICENSE.txt"
+    "url": "/quantized-mesh-encoder/static/js/2.f22d1c7b.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "9b85f3528c80b1e44625",
-    "url": "/quantized-mesh-encoder/static/js/main.6bd63cfd.chunk.js"
+    "revision": "e592bc22f1d8bf157c98",
+    "url": "/quantized-mesh-encoder/static/js/main.a4180c85.chunk.js"
   },
   {
     "revision": "01aa5fa017b936421e3b",
