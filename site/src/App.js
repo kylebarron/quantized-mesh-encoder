@@ -5,11 +5,11 @@ import InfoBox from "./info-box";
 import "./App.css";
 
 const INITIAL_VIEW_STATE = {
-  latitude: 36.07091852096502,
-  longitude: -112.00934837595949,
-  bearing: -35.19642857142857,
-  pitch: 60,
-  zoom: 13.574472859832357,
+  latitude: 48.7,
+  longitude: -113.81,
+  bearing: -3.3,
+  pitch: 65,
+  zoom: 11.6,
   maxPitch: 89,
 };
 
@@ -18,7 +18,7 @@ class App extends React.Component {
     viewState: INITIAL_VIEW_STATE,
     zRange: null,
     meshAlgorithm: "pydelatin",
-    loadTexture: false,
+    loadTexture: true,
   };
 
   // Update zRange of viewport
