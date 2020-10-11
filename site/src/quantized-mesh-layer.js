@@ -14,10 +14,20 @@ function getMeshMaxError(z) {
 }
 
 function quantizedMeshUrl(opts) {
-  const { x, y, z, mosaicUrl = "terrarium", meshMaxError = 10 } = opts;
+  const {
+    x,
+    y,
+    z,
+    mosaicUrl = "terrarium",
+    meshAlgorithm = "pydelatin",
+    meshMaxError = 10,
+  } = opts;
   const params = {
     url: mosaicUrl,
     mesh_max_error: meshMaxError,
+    mesh_algorithm: meshAlgorithm,
+    // True for pydelatin, false for pymartini. Not sure why...
+    flip_y: meshAlgorithm === "pydelatin",
   };
   const searchParams = new URLSearchParams(params);
   let baseUrl = `https://us-east-1-lambda.kylebarron.dev/dem/mesh/${z}/${x}/${y}.terrain?`;
@@ -25,22 +35,26 @@ function quantizedMeshUrl(opts) {
 }
 
 export function QuantizedMeshTerrainLayer(opts) {
-  const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange } = opts || {};
+  const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange, meshAlgorithm } =
+    opts || {};
   return new TileLayer({
     id: "quantized-mesh-tile",
     minZoom,
     maxZoom,
-    getTileData,
+    getTileData: (args) => getTileData({ ...args, meshAlgorithm }),
     renderSubLayers,
     onViewportLoad,
     zRange,
     refinementStrategy: "no-overlap",
+    updateTriggers: {
+      getTileData: [meshAlgorithm],
+    },
   });
 }
 
-async function getTileData({ x, y, z }) {
+async function getTileData({ x, y, z, meshAlgorithm }) {
   const meshMaxError = getMeshMaxError(z);
-  const terrainUrl = quantizedMeshUrl({ x, y, z, meshMaxError });
+  const terrainUrl = quantizedMeshUrl({ x, y, z, meshMaxError, meshAlgorithm });
   return load(terrainUrl, QuantizedMeshLoader);
 }
 

@@ -1,13 +1,20 @@
 import React from "react";
-import { Header, Container, Icon } from "semantic-ui-react";
+import { Header, Container, Icon, Select } from "semantic-ui-react";
+
+const MESH_OPTIONS = [
+  { key: "pydelatin", value: "pydelatin", text: "Algorithm: Delatin" },
+  { key: "pymartini", value: "pymartini", text: "Algorithm: Martini" },
+];
 
 export default function InfoBox(props) {
+  const { meshAlgorithm, onChange } = props;
+
   return (
     <Container
       style={{
         position: "absolute",
         width: 300,
-        maxWidth: '50%',
+        maxWidth: "50%",
         left: 5,
         top: 5,
         padding: 5,
@@ -25,6 +32,15 @@ export default function InfoBox(props) {
         <a
           target="_blank"
           rel="noopener noreferrer"
+          href="https://github.com/kylebarron/pydelatin"
+        >
+          <Icon name="github" />
+          <code>pydelatin</code>
+        </a>{" "}
+        or{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/kylebarron/pymartini"
         >
           <Icon name="github" />
@@ -39,7 +55,15 @@ export default function InfoBox(props) {
           <Icon name="github" />
           <code>quantized-mesh-encoder</code>
         </a>{" "}
-        for encoding to quantized mesh,{" "}
+        for encoding to{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://github.com/CesiumGS/quantized-mesh"
+        >
+          quantized mesh
+        </a>
+        ,{" "}
         <a
           target="_blank"
           rel="noopener noreferrer"
@@ -63,6 +87,12 @@ export default function InfoBox(props) {
           Example source.
         </a>
       </p>
+      <Select
+        placeholder="Select mesh algorithm"
+        options={MESH_OPTIONS}
+        value={meshAlgorithm}
+        onChange={(event, { value }) => onChange({ meshAlgorithm: value })}
+      />
     </Container>
   );
 }

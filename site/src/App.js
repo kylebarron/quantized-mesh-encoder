@@ -17,6 +17,7 @@ class App extends React.Component {
   state = {
     viewState: INITIAL_VIEW_STATE,
     zRange: null,
+    meshAlgorithm: "pydelatin",
   };
 
   // Update zRange of viewport
@@ -39,12 +40,13 @@ class App extends React.Component {
   };
 
   render() {
-    const { viewState, zRange } = this.state;
+    const { viewState, zRange, meshAlgorithm } = this.state;
 
     const layers = [
       QuantizedMeshTerrainLayer({
         onViewportLoad: this.onViewportLoad,
         zRange,
+        meshAlgorithm,
       }),
     ];
 
@@ -56,7 +58,10 @@ class App extends React.Component {
           onViewStateChange={({ viewState }) => this.setState({ viewState })}
           controller={{ touchRotate: true }}
         />
-        <InfoBox />
+        <InfoBox
+          meshAlgorithm={meshAlgorithm}
+          onChange={(newState) => this.setState(newState)}
+        />
       </div>
     );
   }
