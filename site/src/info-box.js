@@ -87,6 +87,14 @@ export default function InfoBox(props) {
               </a>
             </p>
 
+            <p>
+              If you look closely, you should be able to see small differences
+              between the Delatin and Martini meshes. Namely all of Martini's
+              triangles are <i>right</i> triangles, while Delatin doesn't have
+              that restriction, allowing it to have a more efficient mesh (fewer
+              triangles) for a given maximum error.
+            </p>
+
             <Checkbox
               label="Overlay satellite imagery"
               value={loadTexture}
@@ -113,8 +121,7 @@ export default function InfoBox(props) {
     <Container
       style={{
         position: "absolute",
-        width: 300,
-        maxWidth: "50%",
+        width: 400,
         left: 5,
         top: 5,
         padding: 5,
@@ -125,7 +132,14 @@ export default function InfoBox(props) {
         overflow: "visible",
       }}
     >
-      <Accordion defaultActiveIndex={0} styled panels={panels} />
+      <Accordion
+        defaultActiveIndex={0}
+        styled
+        panels={panels}
+        style={{
+          maxWidth: "90%",
+        }}
+      />
     </Container>
   );
 }

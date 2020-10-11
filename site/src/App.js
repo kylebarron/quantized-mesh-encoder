@@ -63,12 +63,13 @@ class App extends React.Component {
           layers={layers}
           onViewStateChange={({ viewState }) => this.setState({ viewState })}
           controller={{ touchRotate: true }}
-        />
-        <InfoBox
-          meshAlgorithm={meshAlgorithm}
-          loadTexture={loadTexture}
-          onChange={(newState) => this.setState(newState)}
-        />
+        >
+          <InfoBox
+            meshAlgorithm={meshAlgorithm}
+            loadTexture={loadTexture}
+            onChange={(newState) => this.setState(newState)}
+          />
+        </DeckGL>
       </div>
     );
   }
