@@ -63,6 +63,10 @@ class App extends React.Component {
           layers={layers}
           onViewStateChange={({ viewState }) => this.setState({ viewState })}
           controller={{ touchRotate: true }}
+          glOptions={{
+            // Tell browser to use discrete GPU if available
+            powerPreference: "high-performance",
+          }}
         >
           <InfoBox
             meshAlgorithm={meshAlgorithm}
