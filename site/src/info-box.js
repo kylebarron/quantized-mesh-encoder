@@ -125,7 +125,7 @@ export default function InfoBox(props) {
         overflow: "visible",
       }}
     >
-      <Accordion defaultActiveIndex={-1} styled panels={panels} />
+      <Accordion defaultActiveIndex={0} styled panels={panels} />
     </Container>
   );
 }
