@@ -1,5 +1,11 @@
 import React from "react";
-import { Accordion, Container, Icon, Select } from "semantic-ui-react";
+import {
+  Accordion,
+  Container,
+  Checkbox,
+  Icon,
+  Select,
+} from "semantic-ui-react";
 
 const MESH_OPTIONS = [
   { key: "pydelatin", value: "pydelatin", text: "Algorithm: Delatin" },
@@ -7,7 +13,7 @@ const MESH_OPTIONS = [
 ];
 
 export default function InfoBox(props) {
-  const { meshAlgorithm, onChange } = props;
+  const { meshAlgorithm, loadTexture, onChange } = props;
 
   const panels = [
     {
@@ -80,6 +86,15 @@ export default function InfoBox(props) {
                 Example source.
               </a>
             </p>
+
+            <Checkbox
+              label="Overlay satellite imagery"
+              value={loadTexture}
+              onClick={(event, { checked }) =>
+                onChange({ loadTexture: checked })
+              }
+            />
+            <br />
             <Select
               placeholder="Select mesh algorithm"
               options={MESH_OPTIONS}

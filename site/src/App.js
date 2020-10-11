@@ -18,6 +18,7 @@ class App extends React.Component {
     viewState: INITIAL_VIEW_STATE,
     zRange: null,
     meshAlgorithm: "pydelatin",
+    loadTexture: false,
   };
 
   // Update zRange of viewport
@@ -27,8 +28,8 @@ class App extends React.Component {
     }
 
     const { zRange } = this.state;
-    const ranges = data.map((arr) => {
-      const bounds = arr.header.boundingBox;
+    const ranges = data.filter(Boolean).map((arr) => {
+      const bounds = arr[0].header.boundingBox;
       return bounds.map((bound) => bound[2]);
     });
     const minZ = Math.min(...ranges.map((x) => x[0]));
@@ -40,19 +41,24 @@ class App extends React.Component {
   };
 
   render() {
-    const { viewState, zRange, meshAlgorithm } = this.state;
+    const { viewState, zRange, meshAlgorithm, loadTexture } = this.state;
 
     const layers = [
       QuantizedMeshTerrainLayer({
         onViewportLoad: this.onViewportLoad,
         zRange,
         meshAlgorithm,
+        loadTexture,
       }),
     ];
 
     return (
       <div>
         <DeckGL
+          // Try to hide tile lod cracks
+          style={{
+            backgroundColor: "rgb(0, 0, 0)",
+          }}
           viewState={viewState}
           layers={layers}
           onViewStateChange={({ viewState }) => this.setState({ viewState })}
@@ -60,6 +66,7 @@ class App extends React.Component {
         />
         <InfoBox
           meshAlgorithm={meshAlgorithm}
+          loadTexture={loadTexture}
           onChange={(newState) => this.setState(newState)}
         />
       </div>

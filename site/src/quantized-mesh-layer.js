@@ -2,10 +2,14 @@ import { TileLayer } from "@deck.gl/geo-layers";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { COORDINATE_SYSTEM } from "@deck.gl/core";
 import { load } from "@loaders.gl/core";
+import { ImageLoader } from "@loaders.gl/images";
 import { QuantizedMeshLoader } from "@loaders.gl/terrain";
 import { Matrix4 } from "math.gl";
 
 const DUMMY_DATA = [1];
+
+// With create react app, env variables need to be prefixed with REACT_APP
+const MapboxAccessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
 // Error suggestion from here
 // https://www.linkedin.com/pulse/fast-cesium-terrain-rendering-new-quantized-mesh-output-alvaro-huarte/
@@ -35,36 +39,52 @@ function quantizedMeshUrl(opts) {
 }
 
 export function QuantizedMeshTerrainLayer(opts) {
-  const { minZoom = 0, maxZoom = 15, onViewportLoad, zRange, meshAlgorithm } =
-    opts || {};
+  const {
+    minZoom = 0,
+    maxZoom = 15,
+    onViewportLoad,
+    zRange,
+    meshAlgorithm,
+    loadTexture,
+  } = opts || {};
   return new TileLayer({
     id: "quantized-mesh-tile",
     minZoom,
     maxZoom,
-    getTileData: (args) => getTileData({ ...args, meshAlgorithm }),
+    getTileData: (args) => getTileData({ ...args, meshAlgorithm, loadTexture }),
     renderSubLayers,
     onViewportLoad,
     zRange,
     refinementStrategy: "no-overlap",
     updateTriggers: {
-      getTileData: [meshAlgorithm],
+      getTileData: [meshAlgorithm, loadTexture],
     },
   });
 }
 
-async function getTileData({ x, y, z, meshAlgorithm }) {
+async function getTileData({ x, y, z, meshAlgorithm, loadTexture }) {
   const meshMaxError = getMeshMaxError(z);
   const terrainUrl = quantizedMeshUrl({ x, y, z, meshMaxError, meshAlgorithm });
-  return load(terrainUrl, QuantizedMeshLoader);
+  const terrain = load(terrainUrl, QuantizedMeshLoader);
+
+  const imageUrl = `https://api.mapbox.com/v4/mapbox.satellite/${z}/${x}/${y}.png?access_token=${MapboxAccessToken}`;
+  let image;
+  if (loadTexture) {
+    image = load(imageUrl, ImageLoader);
+  }
+  return Promise.all([terrain, image]);
 }
 
 function renderSubLayers(props) {
   const { data, tile } = props;
 
+  const [mesh, texture] = data || [];
+
   return [
     new SimpleMeshLayer(props, {
       data: DUMMY_DATA,
-      mesh: data,
+      mesh,
+      texture,
       getPolygonOffset: null,
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       modelMatrix: getModelMatrix(tile),
