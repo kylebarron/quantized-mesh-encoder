@@ -18,7 +18,7 @@ export default function InfoBox(props) {
   const panels = [
     {
       key: "main-panel",
-      title: "Serverless 3D Terrain Mesh",
+      title: "Serverless 3D Terrain",
       content: {
         content: (
           <div>
