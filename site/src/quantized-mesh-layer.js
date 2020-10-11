@@ -56,6 +56,7 @@ export function QuantizedMeshTerrainLayer(opts) {
     onViewportLoad,
     zRange,
     refinementStrategy: "no-overlap",
+    tileSize: 256,
     updateTriggers: {
       getTileData: [meshAlgorithm, loadTexture],
     },
