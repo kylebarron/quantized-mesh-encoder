@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.0] - 2020-10-05
+
+- Allow 2D input for both `positions` and `indices`
+
 ## [0.2.2] - 2020-07-10
 
 - Don't build wheels for PyPy. See https://github.com/joerick/cibuildwheel/issues/402
