@@ -62,6 +62,10 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Install dependencies
+        run: |
+          python -m pip install numpy Cython
+
       - name: Build sdist
         run: python setup.py sdist
 
