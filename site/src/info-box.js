@@ -12,6 +12,69 @@ const MESH_OPTIONS = [
   { key: "pymartini", value: "pymartini", text: "Algorithm: Martini" },
 ];
 
+const VIEW_STATE_OPTIONS = [
+  {
+    key: "glac",
+    value: {
+      latitude: 48.7,
+      longitude: -113.81,
+      bearing: -3.3,
+      pitch: 65,
+      zoom: 11.6,
+      maxPitch: 89,
+    },
+    text: "Glacier National Park",
+  },
+  {
+    key: "grca",
+    value: {
+      latitude: 36.07091852096502,
+      longitude: -112.00934837595949,
+      bearing: -35.19642857142857,
+      pitch: 60,
+      zoom: 13.574472859832357,
+      maxPitch: 89,
+    },
+    text: "Grand Canyon",
+  },
+  {
+    key: "yose",
+    value: {
+      latitude: 37.74831303498057,
+      longitude: -119.54799204629128,
+      bearing: 78.74986923166337,
+      pitch: 65,
+      zoom: 12.1,
+      maxPitch: 89,
+    },
+    text: "Yosemite Valley",
+  },
+  {
+    key: "mtsthelens",
+    value: {
+      latitude: 46.2099889639587,
+      longitude: -122.18025571716424,
+      bearing: 156.227493316285,
+      pitch: 53,
+      zoom: 12.5,
+      maxPitch: 89,
+    },
+    text: "Mt. St. Helens",
+  },
+  {
+    key: "montblanc",
+    value: {
+      latitude: 45.86306112220158,
+      longitude: 6.861778870346716,
+      bearing: 31.589576310589322,
+      pitch: 62.6,
+      zoom: 11.7,
+      maxPitch: 89,
+    },
+    text: "Mont Blanc",
+  },
+];
+
 export default function InfoBox(props) {
   const { meshAlgorithm, loadTexture, onChange } = props;
 
@@ -102,6 +165,13 @@ export default function InfoBox(props) {
               }
             />
             <br />
+            <Select
+              placeholder="Fly to:"
+              options={VIEW_STATE_OPTIONS}
+              // Always shows placeholder
+              value={null}
+              onChange={(event, { value }) => onChange({ viewState: value })}
+            />
             <Select
               placeholder="Select mesh algorithm"
               options={MESH_OPTIONS}
