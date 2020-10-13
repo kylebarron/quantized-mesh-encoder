@@ -22,7 +22,7 @@ jobs:
       with:
         # Only build on CPython
         # PyPy on macos seems to be failing; see https://github.com/joerick/cibuildwheel/issues/402
-        CIBW_BUILD: "cp3?-*"
+        CIBW_BUILD: "cp36-* cp37-* cp38-* cp39-*"
         # Run before build
         CIBW_BEFORE_BUILD: python -m pip install numpy Cython
         # CIBW_BEFORE_TEST: python -m pip install numpy Cython '.[test]'
