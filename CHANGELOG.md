@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2020-10-19
+
+- Add pyx file to sdist
+- Use Github Actions for CI testing
+
 ## [0.3.0] - 2020-10-05
 
 - Allow 2D input for both `positions` and `indices`
