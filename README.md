@@ -34,8 +34,16 @@ mesh generation.
 
 ## Install
 
+With pip:
+
 ```
 pip install quantized-mesh-encoder
+```
+
+or with Conda:
+
+```
+conda install -c conda-forge quantized-mesh-encoder
 ```
 
 ## Using
