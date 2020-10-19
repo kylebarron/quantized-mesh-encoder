@@ -11,11 +11,12 @@ A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
 [example]: https://kylebarron.dev/quantized-mesh-encoder
 
 The Grand Canyon and Walhalla Plateau. The mesh is created using
-[`pymartini`][pymartini], encoded using `quantized-mesh-encoder`, served
-on-demand using [`dem-tiler`][dem-tiler], and rendered with
-[deck.gl](https://deck.gl).
+[`pydelatin`][pydelatin] or [`pymartini`][pymartini], encoded using
+`quantized-mesh-encoder`, served on-demand using [`dem-tiler`][dem-tiler], and
+rendered with [deck.gl](https://deck.gl).
 
 [pymartini]: https://github.com/kylebarron/pymartini
+[pydelatin]: https://github.com/kylebarron/pydelatin
 [dem-tiler]: https://github.com/kylebarron/dem-tiler
 
 ## Overview
