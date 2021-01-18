@@ -58,6 +58,7 @@ def oct_encode(vec):
     result = vec[:, 0:2] / l1_norm[:, np.newaxis]
 
     # TODO: Is 3rd position ever negative?
+    # Might depend on triangle winding order...
     # if vec[2] < 0.0:
     #     x = res[0]
     #     y = res[1]
