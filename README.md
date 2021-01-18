@@ -3,21 +3,27 @@
 [![Build Status](https://travis-ci.org/kylebarron/quantized-mesh-encoder.svg?branch=master)](https://travis-ci.org/kylebarron/quantized-mesh-encoder)
 
 A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
-100k coordinates and 180k triangles in 20ms.
+100k coordinates and 180k triangles in 20ms. [Example viewer][example].
 
-![](./assets/north_cascades.jpg)
+[![][image_url]][example]
 
-Mount Rainier and the central Cascades, using `quantized-mesh-encoder` in
-[`dem-tiler`][dem-tiler] for on-demand mesh generation and rendered with
-[deck.gl](https://deck.gl).
+[image_url]: https://raw.githubusercontent.com/kylebarron/quantized-mesh-encoder/master/assets/no-texture-example.jpg
+[example]: https://kylebarron.dev/quantized-mesh-encoder
 
+The Grand Canyon and Walhalla Plateau. The mesh is created using
+[`pydelatin`][pydelatin] or [`pymartini`][pymartini], encoded using
+`quantized-mesh-encoder`, served on-demand using [`dem-tiler`][dem-tiler], and
+rendered with [deck.gl](https://deck.gl).
+
+[pymartini]: https://github.com/kylebarron/pymartini
+[pydelatin]: https://github.com/kylebarron/pydelatin
 [dem-tiler]: https://github.com/kylebarron/dem-tiler
 
 ## Overview
 
 [Quantized Mesh][quantized_mesh_spec] is a format to encode terrain meshes for
 efficient client-side terrain rendering. Such files are supported in
-[Cesium][cesium] and [deck.gl][deck.gl] (as of release 8.2, expected July 2020.)
+[Cesium][cesium] and [deck.gl][deck.gl].
 
 This library is designed to support performant server-side on-demand terrain
 mesh generation.
@@ -28,8 +34,16 @@ mesh generation.
 
 ## Install
 
+With pip:
+
 ```
 pip install quantized-mesh-encoder
+```
+
+or with Conda:
+
+```
+conda install -c conda-forge quantized-mesh-encoder
 ```
 
 ## Using
@@ -40,14 +54,45 @@ pip install quantized-mesh-encoder
 
 Parameters:
 
-- `f`: a file object in which to write encoded bytes
-- `positions`: (`array[float]`): a flat Numpy array of 3D positions.
-- `indices` (`array[int]`): a flat Numpy array indicating triples of coordinates
-  from `positions` to make triangles. For example, if the first three values of
-  `indices` are `0`, `1`, `2`, then that defines a triangle formed by the first
-  9 values in `positions`, three for the first vertex (index `0`), three for the
-  second vertex, and three for the third vertex.
-- `bounds` (`List[float]`, optional): a list of bounds, `[minx, miny, maxx, maxy]`. By default, inferred as the minimum and maximum values of `positions`.
+- `f`: a writable file-like object in which to write encoded bytes
+- `positions`: (`array[float]`): either a 1D Numpy array or a 2D Numpy array of
+  shape `(-1, 3)` containing 3D positions.
+- `indices` (`array[int]`): either a 1D Numpy array or a 2D Numpy array of shape
+  `(-1, 3)` indicating triples of coordinates from `positions` to make
+  triangles. For example, if the first three values of `indices` are `0`, `1`,
+  `2`, then that defines a triangle formed by the first 9 values in `positions`,
+  three for the first vertex (index `0`), three for the second vertex, and three
+  for the third vertex.
+- `bounds` (`List[float]`, optional): a list of bounds, `[minx, miny, maxx,
+  maxy]`. By default, inferred as the minimum and maximum values of `positions`.
+- `sphere_method` (`str`, optional): As part of the header information when
+  encoding Quantized Mesh, it's necessary to compute a [_bounding
+  sphere_][bounding_sphere], which contains all positions of the mesh.
+  `sphere_method` designates the algorithm to use for creating the bounding
+  sphere. Must be one of `'bounding_box'`, `'naive'`, `'ritter'` or `None`.
+  Default is `None`.
+    - `'bounding_box'`: Finds the bounding box of all positions, then defines
+      the center of the sphere as the center of the bounding box, and defines
+      the radius as the distance back to the corner. This method produces the
+      largest bounding sphere, but is the fastest: roughly 70 µs on my computer.
+    - `'naive'`: Finds the bounding box of all positions, then defines the
+      center of the sphere as the center of the bounding box. It then checks the
+      distance to every other point and defines the radius as the maximum of
+      these distances. This method will produce a slightly smaller bounding
+      sphere than the `bounding_box` method when points are not in the 3D
+      corners. This is the next fastest at roughly 160 µs on my computer.
+    - `'ritter'`: Implements the Ritter Method for bounding spheres. It first
+      finds the center of the longest span, then checks every point for
+      containment, enlarging the sphere if necessary. This _can_ produce smaller
+      bounding spheres than the naive method, but it does not always, so often
+      both are run, see next option. This is the slowest method, at roughly 300
+      µs on my computer.
+    - `None`: Runs both the naive and the ritter methods, then returns the
+      smaller of the two. Since this runs both algorithms, it takes around 500
+      µs on my computer
+
+
+[bounding_sphere]: https://en.wikipedia.org/wiki/Bounding_sphere
 
 ### Examples
 
@@ -95,14 +140,38 @@ was designed to be used with [`pymartini`][pymartini], a fast elevation
 heightmap to terrain mesh generator.
 
 ```py
-martini = Martini(257)
-# generate RTIN hierarchy from terrain data (an array of size^2 length)
+import quantized_mesh_encoder
+from imageio import imread
+from pymartini import decode_ele, Martini, rescale_positions
+import mercantile
+
+png = imread(png_path)
+terrain = decode_ele(png, 'terrarium')
+terrain = terrain.T
+martini = Martini(png.shape[0] + 1)
 tile = martini.create_tile(terrain)
-# get a mesh (vertices and triangles indices) for a 10m error
 vertices, triangles = tile.get_mesh(10)
-buf = BytesIO()
-encode(buf, vertices, triangles)
+
+# Use mercantile to find the bounds in WGS84 of this tile
+bounds = mercantile.bounds(mercantile.Tile(x, y, z))
+
+# Rescale positions to WGS84
+rescaled = rescale_positions(
+    vertices,
+    terrain,
+    bounds=bounds,
+    flip_y=True
+)
+
+with BytesIO() as f:
+    quantized_mesh_encoder.encode(f, rescaled, triangles)
+    f.seek(0)
+    return ("OK", "application/vnd.quantized-mesh", f.read())
 ```
+
+You can also look at the source of
+[`_mesh()`](https://github.com/kylebarron/dem-tiler/blob/5b50a216a014eb32febee84fe3063ca99e71c7f6/dem_tiler/handlers/app.py#L234)
+in [`dem-tiler`][dem-tiler] for a working reference.
 
 ## License
 

@@ -2,6 +2,6 @@
 
 __author__ = """Kyle Barron"""
 __email__ = 'kylebarron2@gmail.com'
-__version__ = '0.1.2'
+__version__ = '0.3.1'
 
 from .encode import encode

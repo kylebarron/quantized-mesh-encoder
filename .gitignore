@@ -1,3 +1,5 @@
+.envrc
+
 # Generated C files from cython
 *.c
 *.terrain
@@ -123,7 +125,6 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
 
 # mypy
 .mypy_cache/
