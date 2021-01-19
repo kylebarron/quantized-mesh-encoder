@@ -1,6 +1,5 @@
 import numpy as np
 cimport numpy as np
-import math
 
 def encode_indices(indices):
     """High-water mark encoding
@@ -70,3 +69,24 @@ def ritter_second_pass(
         centerZ += (mult * dPz)
 
     return np.array([centerX, centerY, centerZ], dtype=np.float32), radius
+
+
+# Cython implementation of:
+# vertex_normals = np.zeros(positions.shape, dtype=np.float32)
+# for triangle, face_norm in zip(indices, weighted_face_normals):
+#     for pos in triangle:
+#         vertex_normals[pos] += face_norm
+def add_vertex_normals(
+    np.ndarray[np.uint32_t, ndim=2] indices,
+    np.ndarray[np.float32_t, ndim=2] normals,
+    np.ndarray[np.float32_t, ndim=2] out):
+
+    cdef long long indices_length = indices.shape[0]
+    cdef Py_ssize_t i, j, k
+    cdef long long vertex
+
+    for i in range(indices_length):
+        for j in range(3):
+            for k in range(3):
+                vertex = indices[i, j]
+                out[vertex, k] += normals[i, k]
