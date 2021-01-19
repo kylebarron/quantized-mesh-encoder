@@ -1,5 +1,7 @@
 import numpy as np
 
+from .util_cy import add_vertex_normals
+
 
 def compute_vertex_normals(positions, indices):
     # Make sure indices and positions are both arrays of shape (-1, 3)
@@ -32,11 +34,8 @@ def compute_vertex_normals(positions, indices):
     # Sum up each vertex normal
     # According to the implementation this is ported from, since you weight the
     # face normals by the area, you can just sum up the vectors.
-    # TODO move to cython
     vertex_normals = np.zeros(positions.shape, dtype=np.float32)
-    for triangle, face_norm in zip(indices, weighted_face_normals):
-        for pos in triangle:
-            vertex_normals[pos] += face_norm
+    add_vertex_normals(indices, weighted_face_normals, vertex_normals)
 
     # Normalize vertex normals by dividing by each vector's length
     normalized_vertex_normals = vertex_normals / np.linalg.norm(
