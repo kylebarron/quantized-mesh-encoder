@@ -1,6 +1,6 @@
 import numpy as np
 
-from .constants import RADIUS_X, RADIUS_Y, RADIUS_Z
+from .constants import WGS84
 
 
 def squared_norm(positions):
@@ -30,8 +30,8 @@ def compute_magnitude(positions, bounding_center):
 
 
 # https://cesiumjs.org/2013/05/09/Computing-the-horizon-occlusion-point/
-def occlusion_point(positions, bounding_center):
-    ellipsoid = np.array([RADIUS_X, RADIUS_Y, RADIUS_Z])
+def occlusion_point(positions, bounding_center, ellipsoid = WGS84):
+    ellipsoid = np.array([ellipsoid["a"], ellipsoid["a"], ellipsoid["b"]])
     # Scale positions relative to ellipsoid
     positions /= ellipsoid
 
