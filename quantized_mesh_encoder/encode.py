@@ -3,12 +3,13 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
+from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84, EXTENSION_HEADER
 from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
+from .normals import compute_vertex_normals, oct_encode
 
 
 def encode(
@@ -17,7 +18,8 @@ def encode(
         indices,
         bounds=None,
         sphere_method=None,
-        ellipsoid=WGS84):
+        ellipsoid=WGS84,
+        generate_normals=False):
     """Create bounding sphere from positions
 
     Args:
@@ -60,6 +62,7 @@ def encode(
             500 µs on my computer
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
+        - generate_normals: bool that determines whether vertexnormals are generated with the tile
     """
 
     # Convert to ndarray
@@ -82,6 +85,9 @@ def encode(
     write_indices(f, indices, n_vertices)
 
     write_edge_indices(f, positions, n_vertices)
+
+    if generate_normals:
+        write_vertex_normals(f, positions, indices)
 
 
 def compute_header(positions, sphere_method, ellipsoid=WGS84):
@@ -284,3 +290,17 @@ def write_edge_indices(f, positions, n_vertices):
 
     f.write(pack(NP_STRUCT_TYPES[np.uint32], len(top)))
     f.write(top.tobytes())
+
+
+def write_vertex_normals(f, positions, indices):
+    normals = compute_vertex_normals(positions, indices)
+    encoded = oct_encode(normals)
+    encoded = encoded.flatten('C')
+    encoded = encoded.tobytes('C')
+
+    s_normals = len(encoded)
+    f.write(
+        pack(EXTENSION_HEADER['extensionId'],
+             1))  # octvertexnormals extension is 1 in the spec
+    f.write(pack(EXTENSION_HEADER['extensionLength'], s_normals))
+    f.write(encoded)

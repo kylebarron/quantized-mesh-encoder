@@ -12,7 +12,7 @@ def compute_vertex_normals(positions, indices):
     # positions and indices are both arrays of shape (-1, 3)
     # `coords` is then an array of shape (-1, 3, 3) where each block of (i, 3,
     # 3) represents all the coordinates of a single triangle
-    tri_coords = positions[indices]
+    tri_coords = positions[indices].astype('float32')
 
     # a, b, and c represent a single vertex for every triangle
     a = tri_coords[:, 0, :]
