@@ -1,6 +1,7 @@
 import numpy as np
 
 from .constants import WGS84
+from .ellipsoid import Ellipsoid
 
 
 def to_ecef(positions, ellipsoid=WGS84):
