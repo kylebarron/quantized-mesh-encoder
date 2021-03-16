@@ -90,6 +90,9 @@ Parameters:
     - `None`: Runs both the naive and the ritter methods, then returns the
       smaller of the two. Since this runs both algorithms, it takes around 500
       µs on my computer
+- `ellipsoid` (`Ellipsoid`, optional): ellipsoid defined by its semi-major `a`
+   and semi-minor `b` axes.
+   Default is WGS84 `Ellipsoid(a=6378137.0, b=6356752.3142451793)`.
 
 
 [bounding_sphere]: https://en.wikipedia.org/wiki/Bounding_sphere

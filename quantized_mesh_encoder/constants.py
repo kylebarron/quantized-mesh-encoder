@@ -1,6 +1,7 @@
 import numpy as np
+from .ellipsoid import Ellipsoid
 
-WGS84 = { "a": 6378137.0, "b": 6356752.3142451793 }
+WGS84 = Ellipsoid(a=6378137.0, b=6356752.3142451793)
 
 NP_STRUCT_TYPES = {
     np.float32: '<f',

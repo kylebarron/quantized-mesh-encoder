@@ -3,6 +3,7 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
+from .ellipsoid import Ellipsoid
 from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
 from .ecef import to_ecef
 from .occlusion import occlusion_point
@@ -51,14 +52,17 @@ def encode(f, positions, indices, bounds=None, sphere_method=None, ellipsoid=WGS
           - None: Runs both the naive and the ritter methods, then returns the
             smaller of the two. Since this runs both algorithms, it takes around
             500 µs on my computer
-        - ellisoid: a dict that defines an ellipsoid with with "a" and "b" values. Defaults to WGS84
+        - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
+          and semi-minor `b` axes.
     """
 
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
 
-    header = compute_header(positions, sphere_method, ellipsoid)
+    assert isinstance(ellipsoid, Ellipsoid), 'ellipsoid must be an instance of the Ellipsoid class'
+
+    header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
@@ -96,7 +100,7 @@ def compute_header(positions, sphere_method, ellipsoid = WGS84):
     header['boundingSphereCenterZ'] = center[2]
     header['boundingSphereRadius'] = radius
 
-    occl_pt = occlusion_point(cartesian_positions, center, ellipsoid)
+    occl_pt = occlusion_point(cartesian_positions, center, ellipsoid=ellipsoid)
     header['horizonOcclusionPointX'] = occl_pt[0]
     header['horizonOcclusionPointY'] = occl_pt[1]
     header['horizonOcclusionPointZ'] = occl_pt[2]

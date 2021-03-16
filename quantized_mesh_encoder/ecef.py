@@ -19,7 +19,6 @@ def to_ecef(positions, ellipsoid = WGS84):
         - ellisoid: a dict that defines an ellipsoid with with "a" and "b" values. Defaults to WGS84
     from latitude-longitude-height to ecef
     """
-    ellipsoid_e2 = 1 - (ellipsoid["b"]**2 / ellipsoid["a"]**2)
     lon = positions[:, 0]
     lat = positions[:, 1]
     alt = positions[:, 2]
@@ -27,12 +26,12 @@ def to_ecef(positions, ellipsoid = WGS84):
     lat *= np.pi / 180
     lon *= np.pi / 180
 
-    n = lambda arr: ellipsoid["a"] / np.sqrt(1 - ellipsoid_e2 * (np.square(np.sin(arr))))
+    n = lambda arr: ellipsoid.a / np.sqrt(1 - ellipsoid.e2* (np.square(np.sin(arr))))
     nlat = n(lat)
 
     x = (nlat + alt) * np.cos(lat) * np.cos(lon)
     y = (nlat + alt) * np.cos(lat) * np.sin(lon)
-    z = (nlat * (1 - ellipsoid_e2) + alt) * np.sin(lat)
+    z = (nlat * (1 - ellipsoid.e2) + alt) * np.sin(lat)
 
     # Do I need geoid correction?
     # https://github.com/bistromath/gr-air-modes/blob/9e2515a56609658f168f0c833a14ca4d2332713e/python/mlat.py#L88-L92
