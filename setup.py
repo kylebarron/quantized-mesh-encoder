@@ -11,7 +11,7 @@ with open("README.md") as f:
     readme = f.read()
 
 # Runtime requirements.
-inst_reqs = ["numpy"]
+inst_reqs = ["numpy", "dataclasses;python_version<'3.7'"]
 
 extra_reqs = {
     "test": ["pytest", "pytest-benchmark", "imageio", "quantized-mesh-tile"], }

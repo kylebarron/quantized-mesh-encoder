@@ -3,14 +3,21 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA
+from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
 from .ecef import to_ecef
+from .ellipsoid import Ellipsoid
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
 
-def encode(f, positions, indices, bounds=None, sphere_method=None):
+def encode(
+        f,
+        positions,
+        indices,
+        bounds=None,
+        sphere_method=None,
+        ellipsoid=WGS84):
     """Create bounding sphere from positions
 
     Args:
@@ -51,13 +58,19 @@ def encode(f, positions, indices, bounds=None, sphere_method=None):
           - None: Runs both the naive and the ritter methods, then returns the
             smaller of the two. Since this runs both algorithms, it takes around
             500 µs on my computer
+        - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
+          and semi-minor `b` axes. Default: WGS84 ellipsoid.
     """
 
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
 
-    header = compute_header(positions, sphere_method)
+    assert isinstance(
+        ellipsoid,
+        Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
+
+    header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
@@ -71,9 +84,9 @@ def encode(f, positions, indices, bounds=None, sphere_method=None):
     write_edge_indices(f, positions, n_vertices)
 
 
-def compute_header(positions, sphere_method):
+def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header = {}
-    cartesian_positions = to_ecef(positions)
+    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
 
     ecef_min_x = cartesian_positions[:, 0].min()
     ecef_min_y = cartesian_positions[:, 1].min()
@@ -95,7 +108,7 @@ def compute_header(positions, sphere_method):
     header['boundingSphereCenterZ'] = center[2]
     header['boundingSphereRadius'] = radius
 
-    occl_pt = occlusion_point(cartesian_positions, center)
+    occl_pt = occlusion_point(cartesian_positions, center, ellipsoid=ellipsoid)
     header['horizonOcclusionPointX'] = occl_pt[0]
     header['horizonOcclusionPointY'] = occl_pt[1]
     header['horizonOcclusionPointZ'] = occl_pt[2]

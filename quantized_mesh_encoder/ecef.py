@@ -1,9 +1,10 @@
 import numpy as np
 
-from .constants import WGS84_A, WGS84_E2
+from .constants import WGS84
+from .ellipsoid import Ellipsoid
 
 
-def to_ecef(positions):
+def to_ecef(positions, ellipsoid=WGS84):
     """Convert positions to earth-centered, earth-fixed coordinates
 
     Ported from
@@ -16,8 +17,13 @@ def to_ecef(positions):
 
     Args:
         - positions: expected to be an ndarray with shape (-1, 3)
-    from latitude-longitude-height to
+          from latitude-longitude-height to ecef
+        - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
+          and semi-minor `b` axes. Default: WGS84 ellipsoid.
     """
+    assert isinstance(
+        ellipsoid,
+        Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
     lon = positions[:, 0]
     lat = positions[:, 1]
@@ -26,12 +32,13 @@ def to_ecef(positions):
     lat *= np.pi / 180
     lon *= np.pi / 180
 
-    n = lambda arr: WGS84_A / np.sqrt(1 - WGS84_E2 * (np.square(np.sin(arr))))
+    n = lambda arr: ellipsoid.a / np.sqrt(
+        1 - ellipsoid.e2 * (np.square(np.sin(arr))))
     nlat = n(lat)
 
     x = (nlat + alt) * np.cos(lat) * np.cos(lon)
     y = (nlat + alt) * np.cos(lat) * np.sin(lon)
-    z = (nlat * (1 - WGS84_E2) + alt) * np.sin(lat)
+    z = (nlat * (1 - ellipsoid.e2) + alt) * np.sin(lat)
 
     # Do I need geoid correction?
     # https://github.com/bistromath/gr-air-modes/blob/9e2515a56609658f168f0c833a14ca4d2332713e/python/mlat.py#L88-L92
