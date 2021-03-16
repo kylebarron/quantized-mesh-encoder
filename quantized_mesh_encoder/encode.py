@@ -3,15 +3,21 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .ellipsoid import Ellipsoid
 from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
 from .ecef import to_ecef
+from .ellipsoid import Ellipsoid
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
 
-def encode(f, positions, indices, bounds=None, sphere_method=None, ellipsoid=WGS84):
+def encode(
+        f,
+        positions,
+        indices,
+        bounds=None,
+        sphere_method=None,
+        ellipsoid=WGS84):
     """Create bounding sphere from positions
 
     Args:
@@ -60,7 +66,9 @@ def encode(f, positions, indices, bounds=None, sphere_method=None, ellipsoid=WGS
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
 
-    assert isinstance(ellipsoid, Ellipsoid), 'ellipsoid must be an instance of the Ellipsoid class'
+    assert isinstance(
+        ellipsoid,
+        Ellipsoid), 'ellipsoid must be an instance of the Ellipsoid class'
 
     header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
@@ -76,7 +84,7 @@ def encode(f, positions, indices, bounds=None, sphere_method=None, ellipsoid=WGS
     write_edge_indices(f, positions, n_vertices)
 
 
-def compute_header(positions, sphere_method, ellipsoid = WGS84):
+def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header = {}
     cartesian_positions = to_ecef(positions, ellipsoid)
 
