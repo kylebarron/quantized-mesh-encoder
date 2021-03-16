@@ -1,0 +1,39 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Default to Python 3
+default_language_version:
+  python: python3
+
+# Optionally both commit and push
+default_stages: [commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.4.2
+    hooks:
+      - id: isort
+        language_version: python3.8
+
+  # repo must have its own .pre-commit-config.yaml file; hence use of mirrors-*
+  - repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.30.0
+    hooks:
+      - id: yapf
+        args:
+          [
+            "--diff",
+            "--parallel",
+            "--recursive",
+            "quantized_mesh_encoder/",
+            "test/",
+            "setup.py",
+          ]
+        language_version: python3.8

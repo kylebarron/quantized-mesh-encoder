@@ -2,9 +2,10 @@ from io import BytesIO
 from numbers import Number
 
 import numpy as np
+from quantized_mesh_tile import TerrainTile
+
 from quantized_mesh_encoder.encode import (
     compute_header, encode, encode_header, interp_positions)
-from quantized_mesh_tile import TerrainTile
 
 
 def test_compute_header():
