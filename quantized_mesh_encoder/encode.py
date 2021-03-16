@@ -59,7 +59,7 @@ def encode(
             smaller of the two. Since this runs both algorithms, it takes around
             500 µs on my computer
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
-          and semi-minor `b` axes.
+          and semi-minor `b` axes. Default: WGS84 ellipsoid.
     """
 
     # Convert to ndarray
@@ -86,7 +86,7 @@ def encode(
 
 def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header = {}
-    cartesian_positions = to_ecef(positions, ellipsoid)
+    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
 
     ecef_min_x = cartesian_positions[:, 0].min()
     ecef_min_y = cartesian_positions[:, 1].min()
