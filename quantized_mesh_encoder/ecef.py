@@ -17,13 +17,13 @@ def to_ecef(positions, ellipsoid=WGS84):
 
     Args:
         - positions: expected to be an ndarray with shape (-1, 3)
-        from latitude-longitude-height to ecef
+          from latitude-longitude-height to ecef
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
     """
     assert isinstance(
         ellipsoid,
-        Ellipsoid), 'ellipsoid must be an instance of the Ellipsoid class'
+        Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
     lon = positions[:, 0]
     lat = positions[:, 1]

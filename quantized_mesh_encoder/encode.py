@@ -68,7 +68,7 @@ def encode(
 
     assert isinstance(
         ellipsoid,
-        Ellipsoid), 'ellipsoid must be an instance of the Ellipsoid class'
+        Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
     header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
