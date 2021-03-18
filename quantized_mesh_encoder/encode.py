@@ -3,13 +3,16 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84, EXTENSION_HEADER
+from .constants import (
+    EXTENSION_HEADER, HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84,
+    QuantizedMeshExtensions)
 from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
+from .extensions import ExtensionBase, VertexNormalsExtension
+from .normals import compute_vertex_normals, oct_encode
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
-from .normals import compute_vertex_normals, oct_encode
 
 
 def encode(
@@ -19,7 +22,7 @@ def encode(
         bounds=None,
         sphere_method=None,
         ellipsoid=WGS84,
-        generate_normals=False):
+        extensions=[]):
     """Create bounding sphere from positions
 
     Args:
@@ -62,7 +65,8 @@ def encode(
             500 µs on my computer
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
-        - generate_normals: bool that determines whether vertexnormals are generated with the tile
+        - extensions: list of instances of the ExtensionBase class. Currently
+          only handling QuantizedMeshExtension
     """
 
     # Convert to ndarray
@@ -73,7 +77,18 @@ def encode(
         ellipsoid,
         Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
-    header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
+    # TODO: Also check no duplicate instances of an extension type
+    assert all(
+        isinstance(ext, ExtensionBase) for ext in extensions
+    ), 'extensions must be list of instances of the Extension class'
+
+    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
+
+    header = compute_header(
+        positions,
+        np.copy(cartesian_positions),
+        sphere_method,
+        ellipsoid=ellipsoid)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
@@ -86,13 +101,14 @@ def encode(
 
     write_edge_indices(f, positions, n_vertices)
 
-    if generate_normals:
-        write_vertex_normals(f, positions, indices)
+    for ext in extensions:
+        if isinstance(ext, VertexNormalsExtension):
+            write_vertex_normals(f, cartesian_positions, indices)
 
 
-def compute_header(positions, sphere_method, ellipsoid=WGS84):
+def compute_header(
+        positions, cartesian_positions, sphere_method, ellipsoid=WGS84):
     header = {}
-    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
 
     ecef_min_x = cartesian_positions[:, 0].min()
     ecef_min_y = cartesian_positions[:, 1].min()
@@ -294,13 +310,11 @@ def write_edge_indices(f, positions, n_vertices):
 
 def write_vertex_normals(f, positions, indices):
     normals = compute_vertex_normals(positions, indices)
-    encoded = oct_encode(normals)
-    encoded = encoded.flatten('C')
-    encoded = encoded.tobytes('C')
+    encoded = oct_encode(normals).tobytes('C')
 
-    s_normals = len(encoded)
     f.write(
-        pack(EXTENSION_HEADER['extensionId'],
-             1))  # octvertexnormals extension is 1 in the spec
-    f.write(pack(EXTENSION_HEADER['extensionLength'], s_normals))
+        pack(
+            EXTENSION_HEADER['extensionId'],
+            QuantizedMeshExtensions.VERTEX_NORMALS))
+    f.write(pack(EXTENSION_HEADER['extensionLength'], len(encoded)))
     f.write(encoded)

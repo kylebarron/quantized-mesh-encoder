@@ -12,7 +12,7 @@ def compute_vertex_normals(positions, indices):
     # positions and indices are both arrays of shape (-1, 3)
     # `coords` is then an array of shape (-1, 3, 3) where each block of (i, 3,
     # 3) represents all the coordinates of a single triangle
-    tri_coords = positions[indices].astype('float32')
+    tri_coords = positions[indices]
 
     # a, b, and c represent a single vertex for every triangle
     a = tri_coords[:, 0, :]
@@ -66,7 +66,7 @@ def oct_encode(vec):
 
     # Converts a scalar value in the range [-1.0, 1.0] to a 8-bit 2's complement
     # number.
-    oct_encoded = np.floor(
-        (np.clip(result, -1, 1) * .5 + .5) * 256).astype(np.uint8)
+    oct_encoded = np.floor((np.clip(result, -1, 1) * .5 + .5) * 256).astype(
+        np.uint8)
 
     return oct_encoded
