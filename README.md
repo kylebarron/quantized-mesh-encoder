@@ -119,28 +119,30 @@ with gzip.open('output.terrain', 'wb') as f:
 
 #### Write to buffer
 
-It's also pretty simple to write to a buffer instead of a file
+It's also pretty simple to write to an in-memory buffer instead of a file
 
 ```py
 from io import BytesIO
 from quantized_mesh_encoder import encode
-buf = BytesIO()
-encode(buf, positions, indices)
+with BytesIO() as bio:
+    encode(bio, positions, indices)
 ```
 
-To read the bytes out of the buffer, e.g. to gzip the buffer
+Or to gzip the in-memory buffer:
 
 ```py
-import zlib
-buf.seek(0)
-out_bytes = zlib.compress(buf.read())
+import gzip
+from io import BytesIO
+with BytesIO() as bio:
+    with gzip.open(bio, 'wb') as gzipf:
+        encode(gzipf, positions, indices)
 ```
 
 #### Generating the mesh
 
 To encode a mesh into a quantized mesh file, you first need a mesh! This project
-was designed to be used with [`pymartini`][pymartini], a fast elevation
-heightmap to terrain mesh generator.
+was designed to be used with [`pydelatin`][pydelatin] or
+[`pymartini`][pymartini], fast elevation heightmap to terrain mesh generators.
 
 ```py
 import quantized_mesh_encoder
