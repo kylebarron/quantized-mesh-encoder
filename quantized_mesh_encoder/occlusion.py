@@ -1,6 +1,6 @@
 import numpy as np
 
-from .constants import RADIUS_X, RADIUS_Y, RADIUS_Z
+from .constants import WGS84
 
 
 def squared_norm(positions):
@@ -30,16 +30,16 @@ def compute_magnitude(positions, bounding_center):
 
 
 # https://cesiumjs.org/2013/05/09/Computing-the-horizon-occlusion-point/
-def occlusion_point(positions, bounding_center):
-    ellipsoid = np.array([RADIUS_X, RADIUS_Y, RADIUS_Z])
+def occlusion_point(positions, bounding_center, ellipsoid=WGS84):
+    cartesian_ellipsoid = np.array([ellipsoid.a, ellipsoid.a, ellipsoid.b])
     # Scale positions relative to ellipsoid
-    positions /= ellipsoid
+    positions /= cartesian_ellipsoid
 
     # Scale center relative to ellipsoid
-    bounding_center /= ellipsoid
+    bounding_center /= cartesian_ellipsoid
 
     # Find magnitudes necessary for each position to not be visible
     magnitudes = compute_magnitude(positions, bounding_center)
 
     # Multiply by maximum magnitude and rescale to ellipsoid surface
-    return bounding_center * magnitudes.max() * ellipsoid
+    return bounding_center * magnitudes.max() * cartesian_ellipsoid

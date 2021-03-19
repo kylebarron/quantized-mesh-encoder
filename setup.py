@@ -2,15 +2,16 @@
 from pathlib import Path
 
 import numpy as np
-# setuptools must be before Cython
 from setuptools import find_packages, setup
-from Cython.Build import cythonize
+
+# setuptools must be before Cython
+from Cython.Build import cythonize  # isort:skip
 
 with open("README.md") as f:
     readme = f.read()
 
 # Runtime requirements.
-inst_reqs = ["numpy"]
+inst_reqs = ["numpy", "dataclasses;python_version<'3.7'"]
 
 extra_reqs = {
     "test": ["pytest", "pytest-benchmark", "imageio", "quantized-mesh-tile"], }

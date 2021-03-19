@@ -1,20 +1,8 @@
 import numpy as np
 
-# From https://github.com/loicgasser/quantized-mesh-tile/blob/master/quantized_mesh_tile/llh_ecef.py
-# Constants taken from http://cesiumjs.org/2013/04/25/Horizon-culling/
-RADIUS_X = 6378137.0
-RADIUS_Y = 6378137.0
-RADIUS_Z = 6356752.3142451793
+from .ellipsoid import Ellipsoid
 
-# Stolen from https://github.com/bistromath/gr-air-modes/blob/master/python/mlat.py
-# WGS84 reference ellipsoid constants
-# http://en.wikipedia.org/wiki/Geodetic_datum#Conversion_calculations
-# http://en.wikipedia.org/wiki/File%3aECEF.png
-WGS84_A = RADIUS_X  # Semi-major axis
-WGS84_B = RADIUS_Z  # Semi-minor axis
-WGS84_E2 = 0.0066943799901975848  # First eccentricity squared
-WGS84_A2 = WGS84_A ** 2  # To speed things up a bit
-WGS84_B2 = WGS84_B ** 2
+WGS84 = Ellipsoid(a=6378137.0, b=6356752.3142451793)
 
 NP_STRUCT_TYPES = {
     np.float32: '<f',
