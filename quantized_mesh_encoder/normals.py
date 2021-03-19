@@ -66,7 +66,7 @@ def oct_encode(vec):
 
     # Converts a scalar value in the range [-1.0, 1.0] to a 8-bit 2's complement
     # number.
-    oct_encoded = np.floor(
-        (np.clip(result, -1, 1) * .5 + .5) * 256).astype(np.uint8)
+    oct_encoded = np.floor((np.clip(result, -1, 1) * .5 + .5) * 256).astype(
+        np.uint8)
 
     return oct_encoded
