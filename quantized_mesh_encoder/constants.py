@@ -1,5 +1,3 @@
-from enum import IntEnum
-
 import numpy as np
 
 from .ellipsoid import Ellipsoid
@@ -58,9 +56,3 @@ EDGE_INDICES32 = {
     'northIndices': '<I'}
 
 EXTENSION_HEADER = {'extensionId': '<B', 'extensionLength': '<I'}
-
-
-class QuantizedMeshExtensions(IntEnum):
-    VERTEX_NORMALS = 1
-    WATER_MASK = 2
-    METADATA = 4

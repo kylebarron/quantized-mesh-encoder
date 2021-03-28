@@ -4,8 +4,7 @@ import numpy as np
 
 from .bounding_sphere import bounding_sphere
 from .constants import (
-    EXTENSION_HEADER, HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84,
-    QuantizedMeshExtensions)
+    EXTENSION_HEADER, HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84)
 from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
 from .extensions import ExtensionBase, VertexNormalsExtension
@@ -16,13 +15,13 @@ from .util_cy import encode_indices
 
 
 def encode(
-        f,
-        positions,
-        indices,
-        bounds=None,
-        sphere_method=None,
-        ellipsoid=WGS84,
-        extensions=[]):
+    f,
+    positions,
+    indices,
+    bounds=None,
+    sphere_method=None,
+    ellipsoid=WGS84,
+    extensions=()):
     """Create bounding sphere from positions
 
     Args:
@@ -77,18 +76,17 @@ def encode(
         ellipsoid,
         Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
-    # TODO: Also check no duplicate instances of an extension type
     assert all(
         isinstance(ext, ExtensionBase) for ext in extensions
     ), 'extensions must be list of instances of the Extension class'
 
-    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
+    assert len({
+        ext.id
+        for ext in extensions}) == len(
+            extensions
+        ), 'extensions list must not include duplicates of same Extension class'
 
-    header = compute_header(
-        positions,
-        np.copy(cartesian_positions),
-        sphere_method,
-        ellipsoid=ellipsoid)
+    header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
 
     # Linear interpolation to range u, v, h from 0-32767
@@ -103,12 +101,13 @@ def encode(
 
     for ext in extensions:
         if isinstance(ext, VertexNormalsExtension):
-            write_vertex_normals(f, cartesian_positions, indices)
+            f.write(ext.encode())
 
 
-def compute_header(
-        positions, cartesian_positions, sphere_method, ellipsoid=WGS84):
+def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header = {}
+
+    cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
 
     ecef_min_x = cartesian_positions[:, 0].min()
     ecef_min_y = cartesian_positions[:, 1].min()
@@ -134,6 +133,7 @@ def compute_header(
     header['horizonOcclusionPointX'] = occl_pt[0]
     header['horizonOcclusionPointY'] = occl_pt[1]
     header['horizonOcclusionPointZ'] = occl_pt[2]
+
     return header
 
 
@@ -306,15 +306,3 @@ def write_edge_indices(f, positions, n_vertices):
 
     f.write(pack(NP_STRUCT_TYPES[np.uint32], len(top)))
     f.write(top.tobytes())
-
-
-def write_vertex_normals(f, positions, indices):
-    normals = compute_vertex_normals(positions, indices)
-    encoded = oct_encode(normals).tobytes('C')
-
-    f.write(
-        pack(
-            EXTENSION_HEADER['extensionId'],
-            QuantizedMeshExtensions.VERTEX_NORMALS))
-    f.write(pack(EXTENSION_HEADER['extensionLength'], len(encoded)))
-    f.write(encoded)
