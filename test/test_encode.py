@@ -53,15 +53,15 @@ def test_encode_header():
 
 
 def test_encode_decode():
+
     positions = np.array(
         [0, 0, 0, 1, 1, 1, 0, 1, 4, 2, 3, 4, 8, 9, 10, 12, 13, 14],
         dtype=np.float32)
     triangles = np.array([0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5], dtype=np.uint32)
-
     cartesian_positions = to_ecef(positions.reshape(-1, 3))
 
     normals_ext = extensions.VertexNormalsExtension(
-        positions=positions, indices=triangles)
+        positions=cartesian_positions, indices=triangles)
 
     f = BytesIO()
     encode(f, positions, triangles, extensions=[normals_ext])
@@ -87,5 +87,7 @@ def test_encode_decode():
     assert tile.northI == [5]
 
     normals = compute_vertex_normals(cartesian_positions, triangles)
-    assert np.array_equal(
-        normals, np.array(tile.vLight)), 'VertexNormals incorrect'
+
+    # Can't test for exact equality with octencode/decode
+    assert np.allclose(
+        normals, tile.vLight, atol=0.01, rtol=0), 'VertexNormals incorrect'

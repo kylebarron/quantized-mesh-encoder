@@ -78,8 +78,8 @@ def ritter_second_pass(
 #         vertex_normals[pos] += face_norm
 def add_vertex_normals(
     np.ndarray[np.uint32_t, ndim=2] indices,
-    np.ndarray[np.float32_t, ndim=2] normals,
-    np.ndarray[np.float32_t, ndim=2] out):
+    np.ndarray[np.float64_t, ndim=2] normals,
+    np.ndarray[np.float64_t, ndim=2] out):
 
     cdef long long indices_length = indices.shape[0]
     cdef Py_ssize_t i, j, k
