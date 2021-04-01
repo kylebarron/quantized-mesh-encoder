@@ -1,8 +1,8 @@
 import abc
-from dataclasses import dataclass, field
 from enum import IntEnum
 from struct import pack
 
+import attr
 import numpy as np
 
 from .constants import EXTENSION_HEADER, WGS84
@@ -17,23 +17,22 @@ class ExtensionId(IntEnum):
     METADATA = 4
 
 
-@dataclass
+@attr.s(kw_only=True)
 class ExtensionBase(metaclass=abc.ABCMeta):
-    id: ExtensionId = field(init=False)
+    id: ExtensionId = attr.ib()
 
-    @property
     @abc.abstractmethod
     def encode(self) -> bytes:
         """"Return the encoded extension data"""
         ...
 
 
-@dataclass
+@attr.s(kw_only=True)
 class VertexNormalsExtension(ExtensionBase):
-    id: ExtensionId = field(init=False, default=ExtensionId.VERTEX_NORMALS)
-    indices: np.ndarray
-    positions: np.ndarray
-    ellipsoid: Ellipsoid = WGS84
+    id: ExtensionId = attr.ib(ExtensionId.VERTEX_NORMALS)
+    indices: np.ndarray = attr.ib()
+    positions: np.ndarray = attr.ib()
+    ellipsoid: Ellipsoid = attr.ib(WGS84)
 
     def encode(self) -> bytes:
         positions = self.positions.reshape(-1, 3)
