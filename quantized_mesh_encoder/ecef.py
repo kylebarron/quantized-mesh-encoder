@@ -25,12 +25,9 @@ def to_ecef(positions, ellipsoid=WGS84):
         ellipsoid,
         Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
 
-    lon = positions[:, 0]
-    lat = positions[:, 1]
+    lon = positions[:, 0] * np.pi / 180
+    lat = positions[:, 1] * np.pi / 180
     alt = positions[:, 2]
-
-    lat *= np.pi / 180
-    lon *= np.pi / 180
 
     n = lambda arr: ellipsoid.a / np.sqrt(
         1 - ellipsoid.e2 * (np.square(np.sin(arr))))

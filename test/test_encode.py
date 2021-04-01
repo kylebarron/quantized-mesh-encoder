@@ -4,14 +4,18 @@ from numbers import Number
 import numpy as np
 from quantized_mesh_tile import TerrainTile
 
+from quantized_mesh_encoder import extensions
+from quantized_mesh_encoder.constants import WGS84
+from quantized_mesh_encoder.ecef import to_ecef
 from quantized_mesh_encoder.encode import (
     compute_header, encode, encode_header, interp_positions)
+from quantized_mesh_encoder.normals import compute_vertex_normals
 
 
 def test_compute_header():
     positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4], dtype=np.float32).reshape(
         -1, 3)
-
+    cartesian_positions = to_ecef(positions)
     header = compute_header(positions, sphere_method=None)
     keys = [
         'centerX', 'centerY', 'centerZ', 'minimumHeight', 'maximumHeight',
@@ -49,16 +53,22 @@ def test_encode_header():
 
 
 def test_encode_decode():
+
     positions = np.array(
         [0, 0, 0, 1, 1, 1, 0, 1, 4, 2, 3, 4, 8, 9, 10, 12, 13, 14],
         dtype=np.float32)
     triangles = np.array([0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5], dtype=np.uint32)
+    cartesian_positions = to_ecef(positions.reshape(-1, 3))
+
+    normals_ext = extensions.VertexNormalsExtension(
+        positions=positions, indices=triangles)
+
     f = BytesIO()
-    encode(f, positions, triangles)
+    encode(f, positions, triangles, extensions=[normals_ext])
 
     f.seek(0)
     tile = TerrainTile()
-    tile.fromBytesIO(f)
+    tile.fromBytesIO(f, hasLighting=True)
 
     assert np.array_equal(
         triangles, np.array(tile.indices, dtype=np.uint32)), 'Indices incorrect'
@@ -75,3 +85,9 @@ def test_encode_decode():
     assert tile.southI == [0]
     assert tile.eastI == [5]
     assert tile.northI == [5]
+
+    normals = compute_vertex_normals(cartesian_positions, triangles)
+
+    # Can't test for exact equality with octencode/decode
+    assert np.allclose(
+        normals, tile.vLight, atol=0.01, rtol=0), 'VertexNormals incorrect'

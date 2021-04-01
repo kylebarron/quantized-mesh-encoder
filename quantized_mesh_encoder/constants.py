@@ -54,3 +54,5 @@ EDGE_INDICES32 = {
     'eastIndices': '<I',
     'northVertexCount': '<I',
     'northIndices': '<I'}
+
+EXTENSION_HEADER = {'extensionId': '<B', 'extensionLength': '<I'}

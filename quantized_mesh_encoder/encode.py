@@ -3,21 +3,25 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
+from .constants import (
+    EXTENSION_HEADER, HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84)
 from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
+from .extensions import ExtensionBase, VertexNormalsExtension
+from .normals import compute_vertex_normals, oct_encode
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
 
 def encode(
-        f,
-        positions,
-        indices,
-        bounds=None,
-        sphere_method=None,
-        ellipsoid=WGS84):
+    f,
+    positions,
+    indices,
+    bounds=None,
+    sphere_method=None,
+    ellipsoid=WGS84,
+    extensions=()):
     """Create bounding sphere from positions
 
     Args:
@@ -60,6 +64,8 @@ def encode(
             500 µs on my computer
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
+        - extensions: list of instances of the ExtensionBase class. Currently
+          only handling QuantizedMeshExtension
     """
 
     # Convert to ndarray
@@ -69,6 +75,16 @@ def encode(
     assert isinstance(
         ellipsoid,
         Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
+
+    assert all(
+        isinstance(ext, ExtensionBase) for ext in extensions
+    ), 'extensions must be list of instances of the Extension class'
+
+    assert len({
+        ext.id
+        for ext in extensions}) == len(
+            extensions
+        ), 'extensions list must not include duplicates of same Extension class'
 
     header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
@@ -83,9 +99,14 @@ def encode(
 
     write_edge_indices(f, positions, n_vertices)
 
+    for ext in extensions:
+        if isinstance(ext, ExtensionBase):
+            f.write(ext.encode())
+
 
 def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header = {}
+
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
 
     ecef_min_x = cartesian_positions[:, 0].min()
@@ -112,6 +133,7 @@ def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header['horizonOcclusionPointX'] = occl_pt[0]
     header['horizonOcclusionPointY'] = occl_pt[1]
     header['horizonOcclusionPointZ'] = occl_pt[2]
+
     return header
 
 
