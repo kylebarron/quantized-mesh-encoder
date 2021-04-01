@@ -30,9 +30,9 @@ class ExtensionBase(metaclass=abc.ABCMeta):
 
 @dataclass
 class VertexNormalsExtension(ExtensionBase):
+    id: ExtensionId = field(init=False, default=ExtensionId.VERTEX_NORMALS)
     indices: np.ndarray
     positions: np.ndarray
-    id: ExtensionId = ExtensionId.VERTEX_NORMALS
     ellipsoid: Ellipsoid = WGS84
 
     def encode(self) -> bytes:
