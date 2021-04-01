@@ -172,7 +172,7 @@ def interp_positions(positions, bounds=None):
         - bounds: If provided should be [minx, miny, maxx, maxy]
 
     Returns:
-        ndarray of shape (-1, 3) and dtype np.uint32
+        ndarray of shape (-1, 3) and dtype np.int16
     """
     if bounds:
         minx, miny, maxx, maxy = bounds
