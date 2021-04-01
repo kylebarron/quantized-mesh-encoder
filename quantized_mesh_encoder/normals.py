@@ -46,8 +46,7 @@ def compute_vertex_normals(positions, indices):
 
 def sign_not_zero(arr):
     """A variation of np.sign that coerces 0 to 1"""
-    signed = np.sign(arr)
-    return np.where(signed == 0, 1, signed)
+    return np.where(arr < 0.0, -1, 1)
 
 
 def oct_encode(vec):
