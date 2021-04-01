@@ -1,6 +1,7 @@
 include CHANGELOG.md
 include LICENSE
 include README.md
+include quantized_mesh_encoder/py.typed
 
 global-include *.pyx
 
