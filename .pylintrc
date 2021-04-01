@@ -81,7 +81,6 @@ enable=
        pointless-string-statement,
        redefined-outer-name,
        super-with-arguments,
-       too-many-locals,
        trailing-comma-tuple,
        undefined-variable,
        unnecessary-comprehension,

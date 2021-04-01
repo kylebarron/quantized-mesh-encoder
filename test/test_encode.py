@@ -5,7 +5,6 @@ import numpy as np
 from quantized_mesh_tile import TerrainTile
 
 from quantized_mesh_encoder import extensions
-from quantized_mesh_encoder.constants import WGS84
 from quantized_mesh_encoder.ecef import to_ecef
 from quantized_mesh_encoder.encode import (
     compute_header, encode, encode_header, interp_positions)
@@ -15,7 +14,6 @@ from quantized_mesh_encoder.normals import compute_vertex_normals
 def test_compute_header():
     positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4], dtype=np.float32).reshape(
         -1, 3)
-    cartesian_positions = to_ecef(positions)
     header = compute_header(positions, sphere_method=None)
     keys = [
         'centerX', 'centerY', 'centerZ', 'minimumHeight', 'maximumHeight',
