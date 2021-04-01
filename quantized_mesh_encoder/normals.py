@@ -3,7 +3,7 @@ import numpy as np
 from .util_cy import add_vertex_normals
 
 
-def compute_vertex_normals(positions, indices, *):
+def compute_vertex_normals(positions, indices):
     # Make sure indices and positions are both arrays of shape (-1, 3)
     positions = positions.reshape(-1, 3).astype('float64')
     indices = indices.reshape(-1, 3)
