@@ -6,6 +6,7 @@ from struct import pack
 import numpy as np
 
 from .constants import EXTENSION_HEADER, WGS84
+from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
 from .normals import compute_vertex_normals, oct_encode
 
@@ -35,7 +36,9 @@ class VertexNormalsExtension(ExtensionBase):
     ellipsoid: Ellipsoid = WGS84
 
     def encode(self) -> bytes:
-        normals = compute_vertex_normals(self.positions, self.indices)
+        positions = self.positions.reshape(-1, 3)
+        cartesian_positions = to_ecef(positions)
+        normals = compute_vertex_normals(cartesian_positions, self.indices)
         encoded = oct_encode(normals).tobytes('C')
 
         buf = b''

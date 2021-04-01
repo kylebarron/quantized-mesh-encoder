@@ -61,7 +61,7 @@ def test_encode_decode():
     cartesian_positions = to_ecef(positions.reshape(-1, 3))
 
     normals_ext = extensions.VertexNormalsExtension(
-        positions=cartesian_positions, indices=triangles)
+        positions=positions, indices=triangles)
 
     f = BytesIO()
     encode(f, positions, triangles, extensions=[normals_ext])
