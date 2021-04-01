@@ -1,11 +1,11 @@
-from dataclasses import dataclass, field
+import attr
 
 
-@dataclass
+@attr.s
 class Ellipsoid:
-    a: float
-    b: float
-    e2: float = field(init=False)
+    a: float = attr.ib()
+    b: float = attr.ib()
+    e2: float = attr.ib(init=False)
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         self.e2 = 1 - (self.b ** 2 / self.a ** 2)
