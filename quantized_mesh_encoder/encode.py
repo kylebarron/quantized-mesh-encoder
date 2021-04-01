@@ -99,7 +99,7 @@ def encode(
             f.write(ext.encode())
 
 
-def compute_header(positions, sphere_method, ellipsoid=WGS84):
+def compute_header(positions, sphere_method, *, ellipsoid=WGS84):
     header = {}
 
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
@@ -118,7 +118,7 @@ def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header['minimumHeight'] = positions[:, 2].min()
     header['maximumHeight'] = positions[:, 2].max()
 
-    center, radius = bounding_sphere(cartesian_positions, sphere_method)
+    center, radius = bounding_sphere(cartesian_positions, method=sphere_method)
     header['boundingSphereCenterX'] = center[0]
     header['boundingSphereCenterY'] = center[1]
     header['boundingSphereCenterZ'] = center[2]
