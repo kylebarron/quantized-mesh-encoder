@@ -3,12 +3,10 @@ from struct import pack
 import numpy as np
 
 from .bounding_sphere import bounding_sphere
-from .constants import (
-    EXTENSION_HEADER, HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84)
+from .constants import HEADER, NP_STRUCT_TYPES, VERTEX_DATA, WGS84
 from .ecef import to_ecef
 from .ellipsoid import Ellipsoid
-from .extensions import ExtensionBase, VertexNormalsExtension
-from .normals import compute_vertex_normals, oct_encode
+from .extensions import ExtensionBase
 from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices

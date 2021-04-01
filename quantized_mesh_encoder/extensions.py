@@ -21,7 +21,6 @@ class ExtensionId(IntEnum):
 class ExtensionBase(metaclass=abc.ABCMeta):
     id: ExtensionId = field(init=False)
 
-    @property
     @abc.abstractmethod
     def encode(self) -> bytes:
         """"Return the encoded extension data"""
