@@ -1,7 +1,9 @@
+from typing import Union
+
 import numpy as np
 
 
-def zig_zag_encode(arr):
+def zig_zag_encode(arr: Union[np.ndarray, int]) -> Union[np.ndarray, int]:
     """
     Input can be number or numpy array
 

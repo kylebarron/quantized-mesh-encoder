@@ -11,12 +11,16 @@ http://www.realtimerendering.com/resources/GraphicsGems/gems/BoundSphere.c
 Math.gl:
 https://github.com/uber-web/math.gl/blob/master/modules/culling/src/algorithms/bounding-sphere-from-points.js
 """
+from typing import Tuple
+
 import numpy as np
 
 from .util_cy import ritter_second_pass
 
 
-def bounding_sphere(positions, *, method: str = None):
+def bounding_sphere(positions: np.ndarray,
+                    *,
+                    method: str = None) -> Tuple[np.ndarray, float]:
     """Create bounding sphere from positions
 
     Args:
@@ -75,7 +79,7 @@ def bounding_sphere(positions, *, method: str = None):
     return ritter_center, ritter_radius
 
 
-def bounding_sphere_ritter(positions):
+def bounding_sphere_ritter(positions: np.ndarray) -> Tuple[np.ndarray, float]:
     """
     Implements Ritter's algorithm
 
@@ -93,12 +97,8 @@ def bounding_sphere_ritter(positions):
     max_z_idx = np.where(positions[:, 2] == positions[:, 2].max())[0][0]
 
     bbox = [
-        positions[min_x_idx],
-        positions[min_y_idx],
-        positions[min_z_idx],
-        positions[max_x_idx],
-        positions[max_y_idx],
-        positions[max_z_idx], ]
+        positions[min_x_idx], positions[min_y_idx], positions[min_z_idx],
+        positions[max_x_idx], positions[max_y_idx], positions[max_z_idx]]
 
     # Pick the pair with the maximum point-to-point separation
     # (which could be greater than the maximum dimensional span)
@@ -125,7 +125,8 @@ def bounding_sphere_ritter(positions):
     return ritter_second_pass(positions, center, radius)
 
 
-def bounding_sphere_from_bounding_box(positions):
+def bounding_sphere_from_bounding_box(
+        positions: np.ndarray) -> Tuple[np.ndarray, float]:
     """Create bounding sphere from axis aligned bounding box
 
     1. Find axis-aligned bounding box,
@@ -140,7 +141,7 @@ def bounding_sphere_from_bounding_box(positions):
     return center, radius
 
 
-def bounding_sphere_naive(positions):
+def bounding_sphere_naive(positions: np.ndarray) -> Tuple[np.ndarray, float]:
     """Create bounding sphere by checking all points
 
     1. Find axis-aligned bounding box,
@@ -155,5 +156,5 @@ def bounding_sphere_naive(positions):
     return center, radius
 
 
-def axis_aligned_bounding_box(positions):
+def axis_aligned_bounding_box(positions: np.ndarray) -> np.ndarray:
     return np.vstack([np.amin(positions, 0), np.amax(positions, 0)])

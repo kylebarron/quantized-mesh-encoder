@@ -3,7 +3,8 @@ import numpy as np
 from .util_cy import add_vertex_normals
 
 
-def compute_vertex_normals(positions, indices):
+def compute_vertex_normals(
+        positions: np.ndarray, indices: np.ndarray) -> np.ndarray:
     # Make sure indices and positions are both arrays of shape (-1, 3)
     positions = positions.reshape(-1, 3).astype('float64')
     indices = indices.reshape(-1, 3)
@@ -44,12 +45,12 @@ def compute_vertex_normals(positions, indices):
     return normalized_vertex_normals
 
 
-def sign_not_zero(arr):
+def sign_not_zero(arr: np.ndarray) -> np.ndarray:
     """A variation of np.sign that coerces 0 to 1"""
     return np.where(arr < 0.0, -1, 1)
 
 
-def oct_encode(vec):
+def oct_encode(vec: np.ndarray) -> np.ndarray:
     """
     Compress x, y, z 96-bit floating point into x, z 16-bit representation (2 snorm values)
     https://github.com/AnalyticalGraphicsInc/cesium/blob/b161b6429b9201c99e5fb6f6e6283f3e8328b323/Source/Core/AttributeCompression.js#L43
