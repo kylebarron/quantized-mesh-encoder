@@ -100,7 +100,7 @@ def encode(
     write_edge_indices(f, positions, n_vertices)
 
     for ext in extensions:
-        if isinstance(ext, VertexNormalsExtension):
+        if isinstance(ext, ExtensionBase):
             f.write(ext.encode())
 
 
