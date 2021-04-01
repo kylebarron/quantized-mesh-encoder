@@ -19,7 +19,7 @@ class ExtensionId(IntEnum):
 
 @dataclass
 class ExtensionBase(metaclass=abc.ABCMeta):
-    id: ExtensionId
+    id: ExtensionId = field(init=False)
 
     @property
     @abc.abstractmethod
