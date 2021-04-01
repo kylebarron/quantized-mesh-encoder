@@ -102,7 +102,7 @@ def encode(
 
 def compute_header(
         positions: np.ndarray,
-        sphere_method: np.ndarray,
+        sphere_method: Optional[str],
         *,
         ellipsoid: Ellipsoid = WGS84) -> Dict[str, Any]:
     header = {}
