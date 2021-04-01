@@ -44,8 +44,10 @@ def compute_vertex_normals(positions, indices):
     return normalized_vertex_normals
 
 
-def signNotZero(v):
-    return -1.0 if v < 0.0 else 1.0
+def sign_not_zero(arr):
+    """A variation of np.sign that coerces 0 to 1"""
+    signed = np.sign(arr)
+    return np.where(signed == 0, 1, signed)
 
 
 def oct_encode(vec):
@@ -60,12 +62,13 @@ def oct_encode(vec):
     l1_norm = np.linalg.norm(vec, ord=1, axis=1)
     result = vec[:, 0:2] / l1_norm[:, np.newaxis]
 
-    for i, res in enumerate(result):
-        if vec[i, 2] < 0.0:
-            x = res[0]
-            y = res[1]
-            res[0] = (1.0 - abs(y)) * signNotZero(x)
-            res[1] = (1.0 - abs(x)) * signNotZero(y)
+    negative = vec[:, 2] < 0.0
+    x = np.copy(result[:, 0])
+    y = np.copy(result[:, 1])
+    result[:, 0] = np.where(
+        negative, (1 - np.abs(y)) * sign_not_zero(x), result[:, 0])
+    result[:, 1] = np.where(
+        negative, (1 - np.abs(x)) * sign_not_zero(y), result[:, 1])
 
     # Converts a scalar value in the range [-1.0, 1.0] to a 8-bit 2's complement
     # number.
