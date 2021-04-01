@@ -16,12 +16,14 @@ import numpy as np
 from .util_cy import ritter_second_pass
 
 
-def bounding_sphere(positions, method: str = None):
+def bounding_sphere(positions, *, method: str = None):
     """Create bounding sphere from positions
 
     Args:
         - positions: an array of shape (-1, 3) and of dtype np.float32 with 3d
           positions
+
+    Kwargs:
         - method: a string designating the algorithm to use for creating the
           bounding sphere. Must be one of `'bounding_box'`, `'naive'`,
           `'ritter'` or `None`.

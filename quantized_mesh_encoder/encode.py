@@ -16,6 +16,7 @@ def encode(
     f,
     positions,
     indices,
+    *,
     bounds=None,
     sphere_method=None,
     ellipsoid=WGS84,
@@ -32,6 +33,8 @@ def encode(
           are `0`, `1`, `2`, then that defines a triangle formed by the first 9
           values in `positions`, three for the first vertex (index `0`), three
           for the second vertex, and three for the third vertex.
+
+    Kwargs:
         - bounds (List[float], optional): a list of bounds, `[minx, miny, maxx,
           maxy]`. By default, inferred as the minimum and maximum values of
           `positions`.
@@ -62,27 +65,21 @@ def encode(
             500 µs on my computer
         - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
-        - extensions: list of instances of the ExtensionBase class. Currently
-          only handling QuantizedMeshExtension
+        - extensions: list of instances of the ExtensionBase class.
     """
 
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
 
-    assert isinstance(
-        ellipsoid,
-        Ellipsoid), ('ellipsoid must be an instance of the Ellipsoid class')
+    msg = 'ellipsoid must be an instance of the Ellipsoid class.'
+    assert isinstance(ellipsoid, Ellipsoid), msg
 
-    assert all(
-        isinstance(ext, ExtensionBase) for ext in extensions
-    ), 'extensions must be list of instances of the Extension class'
+    msg = 'extensions must be instances of the Extension class.'
+    assert all(isinstance(ext, ExtensionBase) for ext in extensions), msg
 
-    assert len({
-        ext.id
-        for ext in extensions}) == len(
-            extensions
-        ), 'extensions list must not include duplicates of same Extension class'
+    msg = 'extensions must have unique ids.'
+    assert len({ext.id for ext in extensions}) == len(extensions), msg
 
     header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
@@ -102,7 +99,7 @@ def encode(
             f.write(ext.encode())
 
 
-def compute_header(positions, sphere_method, ellipsoid=WGS84):
+def compute_header(positions, sphere_method, *, ellipsoid=WGS84):
     header = {}
 
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
@@ -121,7 +118,7 @@ def compute_header(positions, sphere_method, ellipsoid=WGS84):
     header['minimumHeight'] = positions[:, 2].min()
     header['maximumHeight'] = positions[:, 2].max()
 
-    center, radius = bounding_sphere(cartesian_positions, sphere_method)
+    center, radius = bounding_sphere(cartesian_positions, method=sphere_method)
     header['boundingSphereCenterX'] = center[0]
     header['boundingSphereCenterY'] = center[1]
     header['boundingSphereCenterZ'] = center[2]
