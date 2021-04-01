@@ -37,7 +37,7 @@ class VertexNormalsExtension(ExtensionBase):
 
     def encode(self) -> bytes:
         positions = self.positions.reshape(-1, 3)
-        cartesian_positions = to_ecef(positions)
+        cartesian_positions = to_ecef(positions, self.ellipsoid)
         normals = compute_vertex_normals(cartesian_positions, self.indices)
         encoded = oct_encode(normals).tobytes('C')
 
