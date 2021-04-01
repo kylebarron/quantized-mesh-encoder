@@ -1,7 +1,10 @@
+from typing import Union
+
 import numpy as np
 
 
-def zig_zag_encode(arr):
+def zig_zag_encode(
+        arr: Union[np.ndarray, int, np.number]) -> Union[np.ndarray, np.uint16]:
     """
     Input can be number or numpy array
 
@@ -15,4 +18,5 @@ def zig_zag_encode(arr):
     if isinstance(arr, np.ndarray):
         assert arr.dtype == np.int16, 'zig zag encoding requires int16 input'
 
-    return np.bitwise_xor(np.right_shift(arr, 15), np.left_shift(arr, 1))
+    encoded = np.bitwise_xor(np.right_shift(arr, 15), np.left_shift(arr, 1))
+    return encoded.astype(np.uint16)

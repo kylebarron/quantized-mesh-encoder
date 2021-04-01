@@ -4,7 +4,8 @@ from .constants import WGS84
 from .ellipsoid import Ellipsoid
 
 
-def to_ecef(positions, *, ellipsoid=WGS84):
+def to_ecef(
+        positions: np.ndarray, *, ellipsoid: Ellipsoid = WGS84) -> np.ndarray:
     """Convert positions to earth-centered, earth-fixed coordinates
 
     Ported from

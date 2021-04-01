@@ -1,4 +1,5 @@
 from struct import pack
+from typing import Any, BinaryIO, Dict, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -11,16 +12,18 @@ from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
+Bounds = Tuple[float, float, float, float]
+
 
 def encode(
-    f,
-    positions,
-    indices,
+    f: BinaryIO,
+    positions: np.ndarray,
+    indices: np.ndarray,
     *,
-    bounds=None,
-    sphere_method=None,
-    ellipsoid=WGS84,
-    extensions=()):
+    bounds: Optional[Bounds] = None,
+    sphere_method: Optional[str] = None,
+    ellipsoid: Ellipsoid = WGS84,
+    extensions: Sequence[ExtensionBase] = ()) -> None:
     """Create bounding sphere from positions
 
     Args:
@@ -67,7 +70,6 @@ def encode(
           and semi-minor `b` axes. Default: WGS84 ellipsoid.
         - extensions: list of instances of the ExtensionBase class.
     """
-
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
@@ -95,11 +97,14 @@ def encode(
     write_edge_indices(f, positions, n_vertices)
 
     for ext in extensions:
-        if isinstance(ext, ExtensionBase):
-            f.write(ext.encode())
+        f.write(ext.encode())
 
 
-def compute_header(positions, sphere_method, *, ellipsoid=WGS84):
+def compute_header(
+        positions: np.ndarray,
+        sphere_method: Optional[str],
+        *,
+        ellipsoid: Ellipsoid = WGS84) -> Dict[str, Any]:
     header = {}
 
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
@@ -132,7 +137,7 @@ def compute_header(positions, sphere_method, *, ellipsoid=WGS84):
     return header
 
 
-def encode_header(f, data):
+def encode_header(f: BinaryIO, data: Dict[str, Any]) -> None:
     """Encode header data
 
     Args:
@@ -162,7 +167,8 @@ def encode_header(f, data):
         pack(HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
 
 
-def interp_positions(positions, bounds=None):
+def interp_positions(
+        positions: np.ndarray, bounds: Optional[Bounds] = None) -> np.ndarray:
     """Rescale positions to be integers ranging from min to max
 
     TODO allow 6 input elements, for min/max elevation too?
@@ -192,7 +198,7 @@ def interp_positions(positions, bounds=None):
     return np.vstack([u, v, h]).T
 
 
-def write_vertices(f, positions, n_vertices):
+def write_vertices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
     assert positions.ndim == 2, 'positions must be 2 dimensions'
 
     # Write vertex count
@@ -227,7 +233,7 @@ def write_vertices(f, positions, n_vertices):
     f.write(h_zz.tobytes())
 
 
-def write_indices(f, indices, n_vertices):
+def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
     """Write indices to file
 
     """
@@ -263,7 +269,9 @@ def write_indices(f, indices, n_vertices):
     f.write(encoded_ind.tobytes())
 
 
-def find_edge_indices(positions):
+def find_edge_indices(
+    positions: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     u = positions[:, 0]
     v = positions[:, 1]
 
@@ -277,7 +285,8 @@ def find_edge_indices(positions):
     return left, bottom, right, top
 
 
-def write_edge_indices(f, positions, n_vertices):
+def write_edge_indices(
+        f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
     left, bottom, right, top = find_edge_indices(positions)
 
     # If more than 65536 vertices, index data must be uint32
