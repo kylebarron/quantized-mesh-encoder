@@ -30,7 +30,7 @@ def compute_magnitude(positions, bounding_center):
 
 
 # https://cesiumjs.org/2013/05/09/Computing-the-horizon-occlusion-point/
-def occlusion_point(positions, bounding_center, ellipsoid=WGS84):
+def occlusion_point(positions, bounding_center, *, ellipsoid=WGS84):
     cartesian_ellipsoid = np.array([ellipsoid.a, ellipsoid.a, ellipsoid.b])
     # Scale positions relative to ellipsoid
     positions /= cartesian_ellipsoid
