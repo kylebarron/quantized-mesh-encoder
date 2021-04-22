@@ -1,6 +1,8 @@
 import abc
+import json
 from enum import IntEnum
 from struct import pack
+from typing import Dict, Union
 
 import attr
 import numpy as np
@@ -19,7 +21,8 @@ class ExtensionId(IntEnum):
 
 @attr.s(kw_only=True)
 class ExtensionBase(metaclass=abc.ABCMeta):
-    id: ExtensionId = attr.ib()
+    id: ExtensionId = attr.ib(
+        validator=attr.validators.instance_of(ExtensionId))
 
     @abc.abstractmethod
     def encode(self) -> bytes:
@@ -29,10 +32,15 @@ class ExtensionBase(metaclass=abc.ABCMeta):
 
 @attr.s(kw_only=True)
 class VertexNormalsExtension(ExtensionBase):
-    id: ExtensionId = attr.ib(ExtensionId.VERTEX_NORMALS)
-    indices: np.ndarray = attr.ib()
-    positions: np.ndarray = attr.ib()
-    ellipsoid: Ellipsoid = attr.ib(WGS84)
+    id: ExtensionId = attr.ib(
+        ExtensionId.VERTEX_NORMALS,
+        validator=attr.validators.instance_of(ExtensionId))
+    indices: np.ndarray = attr.ib(
+        validator=attr.validators.instance_of(np.ndarray))
+    positions: np.ndarray = attr.ib(
+        validator=attr.validators.instance_of(np.ndarray))
+    ellipsoid: Ellipsoid = attr.ib(
+        WGS84, validator=attr.validators.instance_of(Ellipsoid))
 
     def encode(self) -> bytes:
         positions = self.positions.reshape(-1, 3)
@@ -41,7 +49,55 @@ class VertexNormalsExtension(ExtensionBase):
         encoded = oct_encode(normals).tobytes('C')
 
         buf = b''
-        buf += pack(EXTENSION_HEADER['extensionId'], ExtensionId.VERTEX_NORMALS)
+        buf += pack(EXTENSION_HEADER['extensionId'], self.id.value)
+        buf += pack(EXTENSION_HEADER['extensionLength'], len(encoded))
+        buf += encoded
+
+        return buf
+
+
+@attr.s(kw_only=True)
+class WaterMaskExtension(ExtensionBase):
+    id: ExtensionId = attr.ib(
+        ExtensionId.WATER_MASK,
+        validator=attr.validators.instance_of(ExtensionId))
+    data: Union[np.ndarray, np.uint8, int] = attr.ib(
+        validator=attr.validators.instance_of((np.ndarray, np.uint8, int)))
+
+    def encode(self) -> bytes:
+        encoded: bytes
+        if isinstance(self.data, np.ndarray):
+            # Minify output
+            encoded = self.data.astype(np.uint8).tobytes('C')
+        elif isinstance(self.data, (np.uint8, int)):
+            encoded = np.uint8(self.data).tobytes('C')
+
+        buf = b''
+        buf += pack(EXTENSION_HEADER['extensionId'], self.id.value)
+        buf += pack(EXTENSION_HEADER['extensionLength'], len(encoded))
+        buf += encoded
+
+        return buf
+
+
+@attr.s(kw_only=True)
+class MetadataExtension(ExtensionBase):
+    id: ExtensionId = attr.ib(
+        ExtensionId.METADATA,
+        validator=attr.validators.instance_of(ExtensionId))
+    data: Union[Dict, bytes] = attr.ib(
+        validator=attr.validators.instance_of((dict, bytes)))
+
+    def encode(self) -> bytes:
+        encoded: bytes
+        if isinstance(self.data, dict):
+            # Minify output
+            encoded = json.dumps(self.data, separators=(',', ':')).encode()
+        elif isinstance(self.data, bytes):
+            encoded = self.data
+
+        buf = b''
+        buf += pack(EXTENSION_HEADER['extensionId'], self.id.value)
         buf += pack(EXTENSION_HEADER['extensionLength'], len(encoded))
         buf += encoded
 
