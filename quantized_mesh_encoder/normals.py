@@ -3,8 +3,7 @@ import numpy as np
 from .util_cy import add_vertex_normals
 
 
-def compute_vertex_normals(
-        positions: np.ndarray, indices: np.ndarray) -> np.ndarray:
+def compute_vertex_normals(positions: np.ndarray, indices: np.ndarray) -> np.ndarray:
     # Make sure indices and positions are both arrays of shape (-1, 3)
     positions = positions.reshape(-1, 3).astype('float64')
     indices = indices.reshape(-1, 3)
@@ -39,8 +38,9 @@ def compute_vertex_normals(
     add_vertex_normals(indices, weighted_face_normals, vertex_normals)
 
     # Normalize vertex normals by dividing by each vector's length
-    normalized_vertex_normals = vertex_normals / np.linalg.norm(
-        vertex_normals, axis=1)[:, np.newaxis]
+    normalized_vertex_normals = (
+        vertex_normals / np.linalg.norm(vertex_normals, axis=1)[:, np.newaxis]
+    )
 
     return normalized_vertex_normals
 
@@ -65,14 +65,11 @@ def oct_encode(vec: np.ndarray) -> np.ndarray:
     negative = vec[:, 2] < 0.0
     x = np.copy(result[:, 0])
     y = np.copy(result[:, 1])
-    result[:, 0] = np.where(
-        negative, (1 - np.abs(y)) * sign_not_zero(x), result[:, 0])
-    result[:, 1] = np.where(
-        negative, (1 - np.abs(x)) * sign_not_zero(y), result[:, 1])
+    result[:, 0] = np.where(negative, (1 - np.abs(y)) * sign_not_zero(x), result[:, 0])
+    result[:, 1] = np.where(negative, (1 - np.abs(x)) * sign_not_zero(y), result[:, 1])
 
     # Converts a scalar value in the range [-1.0, 1.0] to a 8-bit 2's complement
     # number.
-    oct_encoded = np.floor((np.clip(result, -1, 1) * .5 + .5) * 256).astype(
-        np.uint8)
+    oct_encoded = np.floor((np.clip(result, -1, 1) * 0.5 + 0.5) * 256).astype(np.uint8)
 
     return oct_encoded

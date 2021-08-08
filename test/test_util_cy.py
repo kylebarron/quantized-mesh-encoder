@@ -14,9 +14,8 @@ def decode_indices(indices):
             highest += 1
     return out
 
-ENCODE_INDICES_CASES = [
-    [0, 1, 2, 1, 2, 3, 3, 4, 5, 2, 3, 4]
-] # yapf: disable
+
+ENCODE_INDICES_CASES = [[0, 1, 2, 1, 2, 3, 3, 4, 5, 2, 3, 4]]
 
 
 @pytest.mark.parametrize("indices", ENCODE_INDICES_CASES)

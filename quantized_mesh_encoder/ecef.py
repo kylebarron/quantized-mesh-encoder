@@ -4,8 +4,7 @@ from .constants import WGS84
 from .ellipsoid import Ellipsoid
 
 
-def to_ecef(
-        positions: np.ndarray, *, ellipsoid: Ellipsoid = WGS84) -> np.ndarray:
+def to_ecef(positions: np.ndarray, *, ellipsoid: Ellipsoid = WGS84) -> np.ndarray:
     """Convert positions to earth-centered, earth-fixed coordinates
 
     Ported from
@@ -31,8 +30,7 @@ def to_ecef(
     lat = positions[:, 1] * np.pi / 180
     alt = positions[:, 2]
 
-    n = lambda arr: ellipsoid.a / np.sqrt(
-        1 - ellipsoid.e2 * (np.square(np.sin(arr))))
+    n = lambda arr: ellipsoid.a / np.sqrt(1 - ellipsoid.e2 * (np.square(np.sin(arr))))
     nlat = n(lat)
 
     x = (nlat + alt) * np.cos(lat) * np.cos(lon)

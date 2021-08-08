@@ -23,7 +23,8 @@ def encode(
     bounds: Optional[Bounds] = None,
     sphere_method: Optional[str] = None,
     ellipsoid: Ellipsoid = WGS84,
-    extensions: Sequence[ExtensionBase] = ()) -> None:
+    extensions: Sequence[ExtensionBase] = ()
+) -> None:
     """Create bounding sphere from positions
 
     Args:
@@ -101,10 +102,8 @@ def encode(
 
 
 def compute_header(
-        positions: np.ndarray,
-        sphere_method: Optional[str],
-        *,
-        ellipsoid: Ellipsoid = WGS84) -> Dict[str, Any]:
+    positions: np.ndarray, sphere_method: Optional[str], *, ellipsoid: Ellipsoid = WGS84
+) -> Dict[str, Any]:
     header = {}
 
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
@@ -151,24 +150,19 @@ def encode_header(f: BinaryIO, data: Dict[str, Any]) -> None:
     f.write(pack(HEADER['minimumHeight'], data['minimumHeight']))
     f.write(pack(HEADER['maximumHeight'], data['maximumHeight']))
 
-    f.write(
-        pack(HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
-    f.write(
-        pack(HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
-    f.write(
-        pack(HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
+    f.write(pack(HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
+    f.write(pack(HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
+    f.write(pack(HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
     f.write(pack(HEADER['boundingSphereRadius'], data['boundingSphereRadius']))
 
-    f.write(
-        pack(HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
-    f.write(
-        pack(HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
-    f.write(
-        pack(HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
+    f.write(pack(HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
+    f.write(pack(HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
+    f.write(pack(HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
 
 
 def interp_positions(
-        positions: np.ndarray, bounds: Optional[Bounds] = None) -> np.ndarray:
+    positions: np.ndarray, bounds: Optional[Bounds] = None
+) -> np.ndarray:
     """Rescale positions to be integers ranging from min to max
 
     TODO allow 6 input elements, for min/max elevation too?
@@ -234,9 +228,7 @@ def write_vertices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
 
 
 def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
-    """Write indices to file
-
-    """
+    """Write indices to file"""
     # If more than 65536 vertices, index data must be uint32
     index_32 = n_vertices > 65536
 
@@ -270,7 +262,7 @@ def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
 
 
 def find_edge_indices(
-    positions: np.ndarray
+    positions: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     u = positions[:, 0]
     v = positions[:, 1]
@@ -285,8 +277,7 @@ def find_edge_indices(
     return left, bottom, right, top
 
 
-def write_edge_indices(
-        f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
+def write_edge_indices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
     left, bottom, right, top = find_edge_indices(positions)
 
     # If more than 65536 vertices, index data must be uint32

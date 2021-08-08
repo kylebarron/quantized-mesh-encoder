@@ -9,7 +9,8 @@ ZIG_ZAG_ENCODE_TEST_CASES = [
     (0, 0),
     (1, 2),
     (2, 4),
-    (np.array([-1, -2], dtype=np.int16), np.array([1, 3], dtype=np.int16)), ]
+    (np.array([-1, -2], dtype=np.int16), np.array([1, 3], dtype=np.int16)),
+]
 
 
 @pytest.mark.parametrize("value,expected", ZIG_ZAG_ENCODE_TEST_CASES)
