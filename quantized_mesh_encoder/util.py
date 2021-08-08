@@ -4,7 +4,8 @@ import numpy as np
 
 
 def zig_zag_encode(
-        arr: Union[np.ndarray, int, np.number]) -> Union[np.ndarray, np.uint16]:
+    arr: Union[np.ndarray, int, np.number]
+) -> Union[np.ndarray, np.uint16]:
     """
     Input can be number or numpy array
 

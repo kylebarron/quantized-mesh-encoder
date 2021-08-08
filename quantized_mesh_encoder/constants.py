@@ -4,11 +4,7 @@ from .ellipsoid import Ellipsoid
 
 WGS84 = Ellipsoid(a=6378137.0, b=6356752.3142451793)
 
-NP_STRUCT_TYPES = {
-    np.float32: '<f',
-    np.float64: '<d',
-    np.uint16: '<H',
-    np.uint32: '<I'}
+NP_STRUCT_TYPES = {np.float32: '<f', np.float64: '<d', np.uint16: '<H', np.uint32: '<I'}
 
 HEADER = {
     'centerX': '<d',  # 8bytes
@@ -22,14 +18,16 @@ HEADER = {
     'boundingSphereRadius': '<d',
     'horizonOcclusionPointX': '<d',
     'horizonOcclusionPointY': '<d',
-    'horizonOcclusionPointZ': '<d'}
+    'horizonOcclusionPointZ': '<d',
+}
 
 VERTEX_DATA = {
     # 4bytes -> determines the size of the 3 following arrays
     'vertexCount': '<I',
     'uVertexCount': '<H',  # 2bytes, unsigned short
     'vVertexCount': '<H',
-    'heightVertexCount': '<H'}
+    'heightVertexCount': '<H',
+}
 
 INDEX_DATA16 = {'triangleCount': '<I', 'indices': '<H'}
 
@@ -43,7 +41,8 @@ EDGE_INDICES16 = {
     'eastVertexCount': '<I',
     'eastIndices': '<H',
     'northVertexCount': '<I',
-    'northIndices': '<H'}
+    'northIndices': '<H',
+}
 
 EDGE_INDICES32 = {
     'westVertexCount': '<I',
@@ -53,6 +52,7 @@ EDGE_INDICES32 = {
     'eastVertexCount': '<I',
     'eastIndices': '<I',
     'northVertexCount': '<I',
-    'northIndices': '<I'}
+    'northIndices': '<I',
+}
 
 EXTENSION_HEADER = {'extensionId': '<B', 'extensionLength': '<I'}

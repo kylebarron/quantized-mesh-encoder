@@ -18,7 +18,7 @@ def test_bounding_sphere_unit_cube():
         1, -1, 1,
         1, 1, -1,
         1, 1, 1,
-    ]  # yapf: disable
+    ]  # fmt: skip
 
     cube = np.array(positions).reshape(-1, 3).astype(np.float32)
     center, radius = bounding_sphere(cube)
@@ -27,6 +27,7 @@ def test_bounding_sphere_unit_cube():
 
 
 # Each inner array must have a multiple of three positions
+# fmt: off
 BOUNDING_SPHERE_CONTAINMENT_CASES = [
     [
         0, 0, 0,
@@ -36,7 +37,9 @@ BOUNDING_SPHERE_CONTAINMENT_CASES = [
         -10, 30, 0,
         0, 30, 30,
     ]
-]  # yapf: disable
+]
+# fmt: on
+
 
 @pytest.mark.parametrize("positions", BOUNDING_SPHERE_CONTAINMENT_CASES)
 def test_bounding_sphere_containment(positions):

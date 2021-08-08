@@ -18,9 +18,9 @@ import numpy as np
 from .util_cy import ritter_second_pass
 
 
-def bounding_sphere(positions: np.ndarray,
-                    *,
-                    method: str = None) -> Tuple[np.ndarray, float]:
+def bounding_sphere(
+    positions: np.ndarray, *, method: str = None
+) -> Tuple[np.ndarray, float]:
     """Create bounding sphere from positions
 
     Args:
@@ -97,8 +97,13 @@ def bounding_sphere_ritter(positions: np.ndarray) -> Tuple[np.ndarray, float]:
     max_z_idx = np.where(positions[:, 2] == positions[:, 2].max())[0][0]
 
     bbox = [
-        positions[min_x_idx], positions[min_y_idx], positions[min_z_idx],
-        positions[max_x_idx], positions[max_y_idx], positions[max_z_idx]]
+        positions[min_x_idx],
+        positions[min_y_idx],
+        positions[min_z_idx],
+        positions[max_x_idx],
+        positions[max_y_idx],
+        positions[max_z_idx],
+    ]
 
     # Pick the pair with the maximum point-to-point separation
     # (which could be greater than the maximum dimensional span)
@@ -126,7 +131,8 @@ def bounding_sphere_ritter(positions: np.ndarray) -> Tuple[np.ndarray, float]:
 
 
 def bounding_sphere_from_bounding_box(
-        positions: np.ndarray) -> Tuple[np.ndarray, float]:
+    positions: np.ndarray,
+) -> Tuple[np.ndarray, float]:
     """Create bounding sphere from axis aligned bounding box
 
     1. Find axis-aligned bounding box,

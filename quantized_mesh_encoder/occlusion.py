@@ -5,12 +5,14 @@ from .ellipsoid import Ellipsoid
 
 
 def squared_norm(positions: np.ndarray) -> np.ndarray:
-    return np.square(positions[:, 0]) + np.square(positions[:, 1]) + np.square(
-        positions[:, 2])
+    return (
+        np.square(positions[:, 0])
+        + np.square(positions[:, 1])
+        + np.square(positions[:, 2])
+    )
 
 
-def compute_magnitude(
-        positions: np.ndarray, bounding_center: np.ndarray) -> np.ndarray:
+def compute_magnitude(positions: np.ndarray, bounding_center: np.ndarray) -> np.ndarray:
     magnitude_squared = squared_norm(positions)
     magnitude = np.sqrt(magnitude_squared)
 
@@ -33,10 +35,8 @@ def compute_magnitude(
 
 # https://cesiumjs.org/2013/05/09/Computing-the-horizon-occlusion-point/
 def occlusion_point(
-        positions: np.ndarray,
-        bounding_center: np.ndarray,
-        *,
-        ellipsoid: Ellipsoid = WGS84) -> np.ndarray:
+    positions: np.ndarray, bounding_center: np.ndarray, *, ellipsoid: Ellipsoid = WGS84
+) -> np.ndarray:
     cartesian_ellipsoid = np.array([ellipsoid.a, ellipsoid.a, ellipsoid.b])
     # Scale positions relative to ellipsoid
     positions /= cartesian_ellipsoid
