@@ -3,6 +3,13 @@ import attr
 
 @attr.s
 class Ellipsoid:
+    """Ellipsoid used for mesh calculations
+
+    Args:
+        a (float): semi-major axis
+        b (float): semi-minor axis
+    """
+
     a: float = attr.ib()
     b: float = attr.ib()
     e2: float = attr.ib(init=False)

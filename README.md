@@ -50,7 +50,7 @@ conda install -c conda-forge quantized-mesh-encoder
 
 ### API
 
-#### `encode`
+#### `quantized_mesh_encoder.encode`
 
 Arguments:
 
@@ -93,12 +93,54 @@ Keyword arguments:
     - `None`: Runs both the naive and the ritter methods, then returns the
       smaller of the two. Since this runs both algorithms, it takes around 500
       µs on my computer
-- `ellipsoid` (`Ellipsoid`, optional): ellipsoid defined by its semi-major `a`
+- `ellipsoid` (`quantized_mesh_encoder.Ellipsoid`, optional): ellipsoid defined by its semi-major `a`
    and semi-minor `b` axes.
    Default: WGS84 ellipsoid.
+- extensions: list of extensions to encode in quantized mesh object. These must be `Extension` instances. See [Quantized Mesh Extensions](#quantized-mesh-extensions).
 
 
 [bounding_sphere]: https://en.wikipedia.org/wiki/Bounding_sphere
+
+#### `quantized_mesh_encoder.Ellipsoid`
+
+Ellipsoid used for mesh calculations.
+
+Arguments:
+
+- `a` (`float`): semi-major axis
+- `b` (`float`): semi-minor axis
+
+#### `quantized_mesh_encoder.WGS84`
+
+Default [WGS84 ellipsoid](https://en.wikipedia.org/wiki/World_Geodetic_System#1984_version). Has a semi-major axis `a` of 6378137.0 meters and semi-minor axis `b` of 6356752.3142451793 meters.
+
+#### Quantized Mesh Extensions
+
+There are a variety of [extensions](https://github.com/CesiumGS/quantized-mesh#extensions) to the Quantized Mesh spec.
+
+##### `quantized_mesh_encoder.VertexNormalsExtension`
+
+Implements the [Terrain Lighting](https://github.com/CesiumGS/quantized-mesh#terrain-lighting) extension. Per-vertex normals will be generated from your mesh data.
+
+Keyword Arguments:
+
+- `indices`: mesh indices
+- `positions`: mesh positions
+- `ellipsoid`: instance of Ellipsoid class, default: WGS84 ellipsoid
+
+##### `quantized_mesh_encoder.WaterMaskExtension`
+
+Implements the [Water Mask](https://github.com/CesiumGS/quantized-mesh#water-mask) extension.
+
+Keyword Arguments:
+
+- `data` (`Union[np.ndarray, np.uint8, int]`): Data for water mask.
+
+##### `quantized_mesh_encoder.MetadataExtension`
+
+Implements the [Metadata](https://github.com/CesiumGS/quantized-mesh#metadata) extension.
+
+- `data` (`Union[Dict, bytes]`): Metadata data to encode. If a dictionary, `json.dumps` will be called to create bytes in UTF-8 encoding.
 
 ### Examples
 
@@ -139,6 +181,38 @@ from io import BytesIO
 with BytesIO() as bio:
     with gzip.open(bio, 'wb') as gzipf:
         encode(gzipf, positions, indices)
+```
+
+
+#### Alternate Ellipsoid
+
+By default, the [WGS84
+ellipsoid](https://en.wikipedia.org/wiki/World_Geodetic_System#1984_version) is
+used for all calculations. An alternate ellipsoid may be useful for non-Earth
+planetary bodies.
+
+```py
+from quantized_mesh_encoder import encode, Ellipsoid
+
+# From https://ui.adsabs.harvard.edu/abs/2010EM%26P..106....1A/abstract
+mars_ellipsoid = Ellipsoid(3_395_428, 3_377_678)
+
+with open('output.terrain', 'wb') as f:
+    encode(f, positions, indices, ellipsoid=mars_ellipsoid)
+```
+
+#### Quantized Mesh Extensions
+
+
+
+```py
+from quantized_mesh_encoder import encode, VertexNormalsExtension, MetadataExtension
+
+vertex_normals = VertexNormalsExtension(positions=positions, indices=indices)
+metadata = MetadataExtension(data={'hello': 'world'})
+
+with open('output.terrain', 'wb') as f:
+    encode(f, positions, indices, extensions=(vertex_normals, metadata))
 ```
 
 #### Generating the mesh

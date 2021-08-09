@@ -31,6 +31,14 @@ class ExtensionBase(metaclass=abc.ABCMeta):
 
 @attr.s(kw_only=True)
 class VertexNormalsExtension(ExtensionBase):
+    """Vertex Normals Extension
+
+    Kwargs:
+        indices: mesh indices
+        positions: mesh positions
+        ellipsoid: instance of Ellipsoid class
+    """
+
     id: ExtensionId = attr.ib(
         ExtensionId.VERTEX_NORMALS, validator=attr.validators.instance_of(ExtensionId)
     )
@@ -41,6 +49,7 @@ class VertexNormalsExtension(ExtensionBase):
     )
 
     def encode(self) -> bytes:
+        """Return encoded extension data"""
         positions = self.positions.reshape(-1, 3)
         cartesian_positions = to_ecef(positions, ellipsoid=self.ellipsoid)
         normals = compute_vertex_normals(cartesian_positions, self.indices)
@@ -56,6 +65,12 @@ class VertexNormalsExtension(ExtensionBase):
 
 @attr.s(kw_only=True)
 class WaterMaskExtension(ExtensionBase):
+    """Water Mask Extension
+
+    Kwargs:
+        data: Either a numpy ndarray or an integer between 0 and 255
+    """
+
     id: ExtensionId = attr.ib(
         ExtensionId.WATER_MASK, validator=attr.validators.instance_of(ExtensionId)
     )
@@ -81,6 +96,12 @@ class WaterMaskExtension(ExtensionBase):
 
 @attr.s(kw_only=True)
 class MetadataExtension(ExtensionBase):
+    """Metadata Extension
+
+    Kwargs:
+        data: Either a dictionary or bytes. If a dictionary, json.dumps will be called to create bytes in UTF-8 encoding.
+    """
+
     id: ExtensionId = attr.ib(
         ExtensionId.METADATA, validator=attr.validators.instance_of(ExtensionId)
     )
