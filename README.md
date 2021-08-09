@@ -203,8 +203,6 @@ with open('output.terrain', 'wb') as f:
 
 #### Quantized Mesh Extensions
 
-
-
 ```py
 from quantized_mesh_encoder import encode, VertexNormalsExtension, MetadataExtension
 
