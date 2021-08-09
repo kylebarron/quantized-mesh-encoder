@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.1] - 2021-08-08
+
+- Fix wheel builds on CI
+
 ## [0.4.0] - 2021-08-08
 
 - Add support for Terrain Lighting, Water Mask, and Metadata extensions
