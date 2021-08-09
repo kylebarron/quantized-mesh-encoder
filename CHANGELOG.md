@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0] - 2021-08-08
+
+- Add support for Terrain Lighting, Water Mask, and Metadata extensions
+- Vertex normals computation as part of Terrain Lighting extension
+- Configurable Ellipsoid support
+- Improved mypy typing
+
 ## [0.3.1] - 2020-10-19
 
 - Add pyx file to sdist
