@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.2] - 2021-12-05
+
+- Build wheels for Python 3.10
+- Use `oldest-supported-numpy` in wheel builds for greatest compatibility
+
 ## [0.4.1] - 2021-08-08
 
 - Fix wheel builds on CI

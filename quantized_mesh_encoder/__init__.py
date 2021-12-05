@@ -2,7 +2,7 @@
 
 __author__ = """Kyle Barron"""
 __email__ = 'kylebarron2@gmail.com'
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 from .constants import WGS84
 from .ellipsoid import Ellipsoid
