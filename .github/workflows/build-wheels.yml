@@ -3,8 +3,8 @@ name: Build Wheels
 # Only run on new tags starting with `v`
 on:
   push:
-    tags:
-      - 'v*'
+#    tags:
+#      - 'v*'
 
 jobs:
   build_wheels:
@@ -18,15 +18,13 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.1.1
+      uses: pypa/cibuildwheel@v2.3.0
       env:
         # From rio-color here:
         # https://github.com/mapbox/rio-color/blob/0ab59ad8e2db99ad1d0c8bd8c2e4cf8d0c3114cf/appveyor.yml#L3
-        # Skip Python 3.10 until officially released, as numpy wheels aren't yet
-        # available
-        CIBW_SKIP: "cp2* cp35* cp310* pp* *-win32 *-manylinux_i686"
+        CIBW_SKIP: "cp2* cp35* pp* *-win32 *-manylinux_i686"
         CIBW_ARCHS_MACOS: x86_64 arm64 universal2
-        CIBW_BEFORE_BUILD: python -m pip install numpy Cython
+        CIBW_BEFORE_BUILD: python -m pip install oldest-supported-numpy Cython
 
     - uses: actions/upload-artifact@v2
       with:
