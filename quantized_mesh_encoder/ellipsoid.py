@@ -15,4 +15,4 @@ class Ellipsoid:
     e2: float = attr.ib(init=False)
 
     def __attrs_post_init__(self):
-        self.e2 = 1 - (self.b ** 2 / self.a ** 2)
+        self.e2 = 1 - (self.b**2 / self.a**2)
