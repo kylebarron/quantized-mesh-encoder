@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.3] - 2022-11-18
+
+- PEP 518-compliant with `pyproject.toml` and `build-system`
+
 ## [0.4.2] - 2021-12-05
 
 - Build wheels for Python 3.10
