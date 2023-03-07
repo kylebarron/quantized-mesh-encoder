@@ -41,11 +41,13 @@ def occlusion_point(
     # Scale positions relative to ellipsoid
     positions /= cartesian_ellipsoid
 
-    # Scale center relative to ellipsoid
-    bounding_center /= cartesian_ellipsoid
+    # Scale center relative to ellipsoid and normalize
+    # see https://github.com/CesiumGS/cesium/blob/9295450e64c3077d96ad579012068ea05f97842c/packages/engine/Source/Core/EllipsoidalOccluder.js#L398
+    scaledSpaceDirectionToPoint = bounding_center / cartesian_ellipsoid
+    scaledSpaceDirectionToPoint /= np.linalg.norm(scaledSpaceDirectionToPoint)
 
     # Find magnitudes necessary for each position to not be visible
-    magnitudes = compute_magnitude(positions, bounding_center)
+    magnitudes = compute_magnitude(positions, scaledSpaceDirectionToPoint)
 
     # Multiply by maximum magnitude and rescale to ellipsoid surface
-    return bounding_center * magnitudes.max() * cartesian_ellipsoid
+    return scaledSpaceDirectionToPoint * magnitudes.max() * cartesian_ellipsoid
