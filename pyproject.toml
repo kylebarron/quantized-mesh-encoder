@@ -1,2 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "cython>=0.29.29", "oldest-supported-numpy"]
+requires = ["setuptools", "wheel", "cython>=0.29.29", "numpy>=2", "build"]
+
+[tool.cibuildwheel]
+skip = "cp38*"
