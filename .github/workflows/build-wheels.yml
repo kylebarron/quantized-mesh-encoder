@@ -44,7 +44,7 @@ jobs:
           python -m pip install numpy Cython
 
       - name: Build sdist
-        run: python setup.py sdist
+        run: python -m build --sdist
 
       - uses: actions/upload-artifact@v4
         with:
