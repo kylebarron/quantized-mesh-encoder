@@ -41,7 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install numpy Cython
+          python -m pip install numpy Cython build
 
       - name: Build sdist
         run: python -m build --sdist
