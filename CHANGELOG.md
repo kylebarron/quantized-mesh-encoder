@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0] - 2025-06-24
+
+- Support numpy v2
+- Refreshed wheel builds
+
 ## [0.4.3] - 2022-11-18
 
 - PEP 518-compliant with `pyproject.toml` and `build-system`
