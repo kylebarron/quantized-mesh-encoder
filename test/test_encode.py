@@ -1,10 +1,11 @@
 from io import BytesIO
 from numbers import Number
+from struct import calcsize, unpack
 
 import numpy as np
 from quantized_mesh_tile import TerrainTile
 
-from quantized_mesh_encoder import extensions
+from quantized_mesh_encoder import WGS84, Ellipsoid, extensions
 from quantized_mesh_encoder.ecef import to_ecef
 from quantized_mesh_encoder.encode import (
     compute_header,
@@ -101,3 +102,29 @@ def test_encode_decode():
     assert np.allclose(
         normals, tile.vLight, atol=0.01, rtol=0
     ), 'VertexNormals incorrect'
+
+
+def test_encode_ellipsoid_numpy_scalars():
+    """An Ellipsoid with numpy float64 axes encodes like one with Python floats.
+
+    Under numpy 2's promotion rules (NEP 50), numpy scalars are no longer
+    demoted to the array's dtype, so the ECEF positions come out as float64.
+    """
+    positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4], dtype=np.float32)
+    triangles = np.array([0, 1, 2], dtype=np.uint32)
+    ellipsoid = Ellipsoid(np.float64(WGS84.a), np.float64(WGS84.b))
+
+    expected = BytesIO()
+    encode(expected, positions, triangles)
+
+    f = BytesIO()
+    encode(f, positions, triangles, ellipsoid=ellipsoid)
+
+    # Header values may differ by float32 rounding; the rest must be identical
+    header_format = '<3d2f4d3d'
+    header_size = calcsize(header_format)
+    assert np.allclose(
+        unpack(header_format, f.getvalue()[:header_size]),
+        unpack(header_format, expected.getvalue()[:header_size]),
+    )
+    assert f.getvalue()[header_size:] == expected.getvalue()[header_size:]

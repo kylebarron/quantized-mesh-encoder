@@ -88,6 +88,11 @@ def bounding_sphere_ritter(positions: np.ndarray) -> Tuple[np.ndarray, float]:
 
     Slowest, but overall still quite fast: 304 µs
     """
+    # The Cython second pass only accepts float32. Positions may be float64,
+    # e.g. ECEF positions computed with an Ellipsoid holding numpy float64
+    # scalars, which numpy 2 no longer demotes to float32.
+    positions = positions.astype(np.float32, copy=False)
+
     # Find points containing smallest and largest component
     min_x_idx = np.where(positions[:, 0] == positions[:, 0].min())[0][0]
     min_y_idx = np.where(positions[:, 1] == positions[:, 1].min())[0][0]
