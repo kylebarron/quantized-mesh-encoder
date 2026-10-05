@@ -1,10 +1,13 @@
 """Top-level package for quantized_mesh_encoder."""
 
-__author__ = """Kyle Barron"""
-__email__ = "kylebarron2@gmail.com"
-__version__ = "0.5.0"
+from importlib.metadata import PackageNotFoundError, version
 
 from .constants import WGS84
 from .ellipsoid import Ellipsoid
 from .encode import encode
 from .extensions import MetadataExtension, VertexNormalsExtension, WaterMaskExtension
+
+try:
+    __version__ = version("quantized-mesh-encoder")
+except PackageNotFoundError:
+    __version__ = "uninstalled"

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Package metadata moved to `pyproject.toml`. The `test` extra was removed; development dependencies are now a `dev` dependency group managed with `uv`. See `DEVELOP.md`.
+
 ## [0.5.0] - 2025-06-24
 
 - Support numpy v2

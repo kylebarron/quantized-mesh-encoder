@@ -1,13 +1,13 @@
 # quantized-mesh-encoder
 
-[![Build Status](https://travis-ci.org/kylebarron/quantized-mesh-encoder.svg?branch=master)](https://travis-ci.org/kylebarron/quantized-mesh-encoder)
+[![Test](https://github.com/kylebarron/quantized-mesh-encoder/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/kylebarron/quantized-mesh-encoder/actions/workflows/test.yml)
 
 A fast Python [Quantized Mesh][quantized_mesh_spec] encoder. Encodes a mesh with
 100k coordinates and 180k triangles in 20ms. [Example viewer][example].
 
 [![][image_url]][example]
 
-[image_url]: https://raw.githubusercontent.com/kylebarron/quantized-mesh-encoder/master/assets/no-texture-example.jpg
+[image_url]: https://raw.githubusercontent.com/kylebarron/quantized-mesh-encoder/main/assets/no-texture-example.jpg
 [example]: https://kylebarron.dev/quantized-mesh-encoder
 
 The Grand Canyon and Walhalla Plateau. The mesh is created using
