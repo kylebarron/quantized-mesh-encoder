@@ -13,17 +13,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
+        # macos-15-intel is an intel runner, macos-14 is apple silicon
         os:
-          [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14]
+          [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-15-intel, macos-14]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.0.0
+        uses: pypa/cibuildwheel@v4.2.1
+        env:
+          # Skip free-threaded builds (cp314t), which cibuildwheel builds by
+          # default: the extension doesn't declare that it's safe without the
+          # GIL. This overrides `skip` in pyproject.toml, so repeat cp38 here.
+          CIBW_SKIP: "cp38* cp3??t-*"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
