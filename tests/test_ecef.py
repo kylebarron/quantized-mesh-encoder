@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from quantized_mesh_encoder import Ellipsoid
 from quantized_mesh_encoder.ecef import to_ecef
 
 # Conversion reference
@@ -25,3 +26,26 @@ def test_to_ecef(llh_positions, exp_positions):
     assert np.isclose(round(cart_positions[0, 0], 1), exp_positions[0])
     assert np.isclose(round(cart_positions[0, 1], 1), exp_positions[1])
     assert np.isclose(round(cart_positions[0, 2], 1), exp_positions[2])
+
+
+@pytest.mark.parametrize(
+    ("llh_position", "exp_position"),
+    [
+        ([0, 0, 0], [10, 0, 0]),
+        ([90, 0, 0], [0, 10, 0]),
+        ([0, 90, 5], [0, 0, 15]),
+        ([180, 0, 1], [-11, 0, 0]),
+    ],
+)
+def test_to_ecef_sphere(llh_position, exp_position):
+    """On a sphere, ECEF positions are spherical coordinates."""
+    sphere = Ellipsoid(a=10, b=10)
+    arr = np.array(llh_position, dtype=np.float64).reshape(-1, 3)
+    cart_positions = to_ecef(arr, ellipsoid=sphere)
+    assert np.allclose(cart_positions[0], exp_position, atol=1e-9)
+
+
+def test_to_ecef_requires_ellipsoid():
+    arr = np.zeros((1, 3))
+    with pytest.raises(AssertionError):
+        to_ecef(arr, ellipsoid=(10, 10))
