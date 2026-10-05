@@ -70,8 +70,9 @@ def oct_encode(vec: np.ndarray) -> np.ndarray:
     result[:, 0] = np.where(negative, (1 - np.abs(y)) * sign_not_zero(x), result[:, 0])
     result[:, 1] = np.where(negative, (1 - np.abs(x)) * sign_not_zero(y), result[:, 1])
 
-    # Converts a scalar value in the range [-1.0, 1.0] to a 8-bit 2's complement
-    # number.
-    oct_encoded = np.floor((np.clip(result, -1, 1) * 0.5 + 0.5) * 256).astype(np.uint8)
+    # Converts a scalar value in the range [-1.0, 1.0] to an 8-bit SNORM value
+    # in the range [0, 255], like Cesium's `CesiumMath.toSNorm`. Scaling by 256
+    # would overflow uint8 for a value of exactly 1.0.
+    oct_encoded = np.round((np.clip(result, -1, 1) * 0.5 + 0.5) * 255).astype(np.uint8)
 
     return oct_encoded
