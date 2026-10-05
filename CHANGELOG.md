@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix `encode` raising `ValueError: Buffer dtype mismatch` with numpy 2 when the `Ellipsoid` axes are numpy float64 scalars. `bounding_sphere` now also accepts float64 positions with the default and `'ritter'` methods.
+- Fix `VertexNormalsExtension` raising `ValueError: Buffer dtype mismatch` for indices that aren't `uint32`, such as the default `int64` from `np.array`. `encode` already accepted any integer dtype.
 - Package metadata moved to `pyproject.toml`. The `test` extra was removed; development dependencies are now a `dev` dependency group managed with `uv`. See `DEVELOP.md`.
 
 ## [0.5.0] - 2025-06-24

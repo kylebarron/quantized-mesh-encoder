@@ -128,3 +128,19 @@ def test_encode_ellipsoid_numpy_scalars():
         unpack(header_format, expected.getvalue()[:header_size]),
     )
     assert f.getvalue()[header_size:] == expected.getvalue()[header_size:]
+
+
+def test_vertex_normals_extension_index_dtype():
+    """VertexNormalsExtension accepts any integer index dtype, like encode."""
+    positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4, 2, 3, 4], dtype=np.float32)
+    triangles = np.array([0, 1, 2, 1, 2, 3], dtype=np.uint32)
+
+    expected = extensions.VertexNormalsExtension(
+        positions=positions, indices=triangles
+    ).encode()
+
+    for dtype in [np.int32, np.int64, np.uint16]:
+        ext = extensions.VertexNormalsExtension(
+            positions=positions, indices=triangles.astype(dtype)
+        )
+        assert ext.encode() == expected, dtype

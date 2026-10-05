@@ -6,7 +6,9 @@ from .util_cy import add_vertex_normals
 def compute_vertex_normals(positions: np.ndarray, indices: np.ndarray) -> np.ndarray:
     # Make sure indices and positions are both arrays of shape (-1, 3)
     positions = positions.reshape(-1, 3).astype('float64')
-    indices = indices.reshape(-1, 3)
+    # The Cython helper only accepts uint32 indices, the same dtype `encode`
+    # casts indices to
+    indices = indices.reshape(-1, 3).astype(np.uint32, copy=False)
 
     # Perform coordinate lookup in positions using indices
     # positions and indices are both arrays of shape (-1, 3)
