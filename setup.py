@@ -17,4 +17,8 @@ ext_modules = [
     ),
 ]
 
-setup(ext_modules=cythonize(ext_modules, language_level=3))
+# Always regenerate the C source. A C file generated in an earlier build may
+# target a newer numpy than the one in this build environment (e.g. after
+# building for another Python version), and Cython's timestamp check doesn't
+# notice when numpy changes.
+setup(ext_modules=cythonize(ext_modules, language_level=3, force=True))
