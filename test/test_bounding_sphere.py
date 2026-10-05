@@ -71,3 +71,15 @@ def test_bounding_sphere_containment_ritter(positions):
 
     # All distances to the center must be <= the radius
     assert (distances <= radius).all(), 'A position outside bounding sphere'
+
+
+@pytest.mark.parametrize("method", [None, 'ritter'])
+def test_bounding_sphere_float64(method):
+    """float64 positions are accepted, not only float32."""
+    positions = np.array(BOUNDING_SPHERE_CONTAINMENT_CASES[0], dtype=np.float64)
+    positions = positions.reshape(-1, 3)
+    center, radius = bounding_sphere(positions, method=method)
+
+    # The sphere is computed in float32, so allow for float32 rounding
+    distances = np.linalg.norm(positions - center, axis=1)
+    assert (distances <= radius * (1 + 1e-6)).all(), 'A position outside bounding sphere'
