@@ -1,7 +1,10 @@
 import numpy as np
 import pytest
 
-from quantized_mesh_encoder.bounding_sphere import bounding_sphere
+from quantized_mesh_encoder.bounding_sphere import (
+    axis_aligned_bounding_box,
+    bounding_sphere,
+)
 
 
 def test_bounding_sphere_unit_cube():
@@ -83,3 +86,33 @@ def test_bounding_sphere_float64(method):
     assert (distances <= radius * (1 + 1e-6)).all(), (
         "A position outside bounding sphere"
     )
+
+
+@pytest.mark.parametrize("method", [None, "bounding_box", "naive", "ritter"])
+@pytest.mark.parametrize("positions", BOUNDING_SPHERE_CONTAINMENT_CASES)
+def test_bounding_sphere_containment_all_methods(positions, method):
+    positions = np.array(positions).reshape(-1, 3).astype(np.float32)
+    center, radius = bounding_sphere(positions, method=method)
+
+    # Allow for float32 rounding
+    distances = np.linalg.norm(positions - center, axis=1)
+    assert (distances <= radius * (1 + 1e-6)).all(), "A position outside sphere"
+
+
+def test_bounding_sphere_method_sizes():
+    """The bounding box sphere is the largest; the default is the smallest."""
+    positions = np.array(BOUNDING_SPHERE_CONTAINMENT_CASES[0], dtype=np.float32)
+    positions = positions.reshape(-1, 3)
+
+    radii = {
+        method: bounding_sphere(positions, method=method)[1]
+        for method in [None, "bounding_box", "naive", "ritter"]
+    }
+    assert radii["bounding_box"] >= radii["naive"]
+    assert radii[None] == min(radii["naive"], radii["ritter"])
+
+
+def test_axis_aligned_bounding_box():
+    positions = np.array([[0, 5, -1], [2, -3, 4], [1, 1, 1]], dtype=np.float32)
+    bbox = axis_aligned_bounding_box(positions)
+    assert np.array_equal(bbox, [[0, -3, -1], [2, 5, 4]])

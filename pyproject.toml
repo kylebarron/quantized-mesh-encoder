@@ -45,6 +45,15 @@ include = ["quantized_mesh_encoder", "quantized_mesh_encoder.*"]
 
 [tool.cibuildwheel]
 skip = "cp38*"
+test-groups = ["dev"]
+test-command = "pytest {project}/tests"
+# shapely, which quantized-mesh-tile depends on, has no wheels for these
+test-skip = "cp39-musllinux* cp315*"
+
+[tool.pytest.ini_options]
+# Import the installed package rather than the source tree, which has no
+# compiled extension when testing a built wheel (e.g. in cibuildwheel)
+addopts = ["--import-mode=importlib"]
 
 [tool.ruff]
 # React demo app deployed to gh-pages
@@ -65,8 +74,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"test/*" = [
-    "INP001",  # no __init__.py: the `test` dir name would shadow the stdlib package
+"tests/*" = [
     "ANN001",  # annotation in function argument
     "ANN201",  # return type annotation
     "PLR2004", # Magic value used in comparison

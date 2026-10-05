@@ -7,5 +7,6 @@ global-include *.pyx
 global-include *.pyi
 
 recursive-include tests *
+prune site
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
