@@ -13,7 +13,7 @@ ZIG_ZAG_ENCODE_TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize("value,expected", ZIG_ZAG_ENCODE_TEST_CASES)
+@pytest.mark.parametrize(("value", "expected"), ZIG_ZAG_ENCODE_TEST_CASES)
 def test_zig_zag_encode(value, expected):
     if isinstance(value, np.ndarray) or isinstance(expected, np.ndarray):
         assert np.array_equal(zig_zag_encode(value), expected)

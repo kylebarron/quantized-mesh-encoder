@@ -20,39 +20,39 @@ def test_compute_header():
     positions = np.array([0, 0, 0, 1, 1, 1, 0, 1, 4], dtype=np.float32).reshape(-1, 3)
     header = compute_header(positions, sphere_method=None)
     keys = [
-        'centerX',
-        'centerY',
-        'centerZ',
-        'minimumHeight',
-        'maximumHeight',
-        'boundingSphereCenterX',
-        'boundingSphereCenterY',
-        'boundingSphereCenterZ',
-        'boundingSphereRadius',
-        'horizonOcclusionPointX',
-        'horizonOcclusionPointY',
-        'horizonOcclusionPointZ',
+        "centerX",
+        "centerY",
+        "centerZ",
+        "minimumHeight",
+        "maximumHeight",
+        "boundingSphereCenterX",
+        "boundingSphereCenterY",
+        "boundingSphereCenterZ",
+        "boundingSphereRadius",
+        "horizonOcclusionPointX",
+        "horizonOcclusionPointY",
+        "horizonOcclusionPointZ",
     ]
-    assert all(k in header.keys() for k in keys), 'Header key missing'
-    assert all(
-        isinstance(v, Number) for v in header.values()
-    ), 'Header value not numeric'
+    assert all(k in header for k in keys), "Header key missing"
+    assert all(isinstance(v, Number) for v in header.values()), (
+        "Header value not numeric"
+    )
 
 
 def test_encode_header():
     header = {
-        'centerX': 6377169.5,
-        'centerY': 55648.50390625,
-        'centerZ': 55284.421875,
-        'minimumHeight': 0.0,
-        'maximumHeight': 4.0,
-        'boundingSphereCenterX': 6377169.5,
-        'boundingSphereCenterY': 55648.504,
-        'boundingSphereCenterZ': 55284.42,
-        'boundingSphereRadius': 78447.81,
-        'horizonOcclusionPointX': 6378226.71931529,
-        'horizonOcclusionPointY': 55657.731270568445,
-        'horizonOcclusionPointZ': 55293.58686988714,
+        "centerX": 6377169.5,
+        "centerY": 55648.50390625,
+        "centerZ": 55284.421875,
+        "minimumHeight": 0.0,
+        "maximumHeight": 4.0,
+        "boundingSphereCenterX": 6377169.5,
+        "boundingSphereCenterY": 55648.504,
+        "boundingSphereCenterZ": 55284.42,
+        "boundingSphereRadius": 78447.81,
+        "horizonOcclusionPointX": 6378226.71931529,
+        "horizonOcclusionPointY": 55657.731270568445,
+        "horizonOcclusionPointZ": 55293.58686988714,
     }
 
     buf = BytesIO()
@@ -60,7 +60,7 @@ def test_encode_header():
     buf.seek(0)
     b = buf.read()
 
-    assert len(b) == 88, 'Header incorrect number of bytes'
+    assert len(b) == 88, "Header incorrect number of bytes"
 
 
 def test_encode_decode():
@@ -82,14 +82,14 @@ def test_encode_decode():
     tile = TerrainTile()
     tile.fromBytesIO(f, hasLighting=True)
 
-    assert np.array_equal(
-        triangles, np.array(tile.indices, dtype=np.uint32)
-    ), 'Indices incorrect'
+    assert np.array_equal(triangles, np.array(tile.indices, dtype=np.uint32)), (
+        "Indices incorrect"
+    )
     u, v, h = interp_positions(positions.reshape(-1, 3)).T
 
-    assert np.array_equal(u, np.array(tile.u, dtype=np.uint32)), 'Vertices incorrect'
-    assert np.array_equal(v, np.array(tile.v, dtype=np.uint32)), 'Vertices incorrect'
-    assert np.array_equal(h, np.array(tile.h, dtype=np.uint32)), 'Vertices incorrect'
+    assert np.array_equal(u, np.array(tile.u, dtype=np.uint32)), "Vertices incorrect"
+    assert np.array_equal(v, np.array(tile.v, dtype=np.uint32)), "Vertices incorrect"
+    assert np.array_equal(h, np.array(tile.h, dtype=np.uint32)), "Vertices incorrect"
 
     assert tile.westI == [0, 2]
     assert tile.southI == [0]
@@ -99,9 +99,9 @@ def test_encode_decode():
     normals = compute_vertex_normals(cartesian_positions, triangles)
 
     # Can't test for exact equality with octencode/decode
-    assert np.allclose(
-        normals, tile.vLight, atol=0.01, rtol=0
-    ), 'VertexNormals incorrect'
+    assert np.allclose(normals, tile.vLight, atol=0.01, rtol=0), (
+        "VertexNormals incorrect"
+    )
 
 
 def test_encode_ellipsoid_numpy_scalars():
@@ -121,7 +121,7 @@ def test_encode_ellipsoid_numpy_scalars():
     encode(f, positions, triangles, ellipsoid=ellipsoid)
 
     # Header values may differ by float32 rounding; the rest must be identical
-    header_format = '<3d2f4d3d'
+    header_format = "<3d2f4d3d"
     header_size = calcsize(header_format)
     assert np.allclose(
         unpack(header_format, f.getvalue()[:header_size]),

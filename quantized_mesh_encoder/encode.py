@@ -1,5 +1,9 @@
+"""Encode a mesh into the Quantized Mesh format."""
+
+from __future__ import annotations
+
 from struct import pack
-from typing import Any, BinaryIO, Dict, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, BinaryIO
 
 import numpy as np
 
@@ -12,77 +16,67 @@ from .occlusion import occlusion_point
 from .util import zig_zag_encode
 from .util_cy import encode_indices
 
-Bounds = Tuple[float, float, float, float]
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+Bounds = tuple[float, float, float, float]
+
+# Quantized vertex coordinates range from 0 to this value
+_MAX_QUANTIZED = 32767
+
+# Meshes with more vertices than this must use 32-bit indices
+_MAX_INDEX16_VERTICES = 65536
 
 
-def encode(
+def encode(  # noqa: PLR0913
     f: BinaryIO,
     positions: np.ndarray,
     indices: np.ndarray,
     *,
-    bounds: Optional[Bounds] = None,
-    sphere_method: Optional[str] = None,
+    bounds: Bounds | None = None,
+    sphere_method: str | None = None,
     ellipsoid: Ellipsoid = WGS84,
-    extensions: Sequence[ExtensionBase] = ()
+    extensions: Sequence[ExtensionBase] = (),
 ) -> None:
-    """Create bounding sphere from positions
+    """Encode a mesh into Quantized Mesh and write it to a file.
 
     Args:
-        - f: a writable file-like object in which to write encoded bytes
-        - positions: (ndarray[float]): either a 1D Numpy array or a 2D Numpy
-          array of shape (-1, 3) containing 3D positions.
-        - indices (ndarray[int]): either a 1D Numpy array or a 2D Numpy array of
-          shape (-1, 3) indicating triples of coordinates from `positions` to
-          make triangles. For example, if the first three values of `indices`
-          are `0`, `1`, `2`, then that defines a triangle formed by the first 9
-          values in `positions`, three for the first vertex (index `0`), three
-          for the second vertex, and three for the third vertex.
+        f: A writable file-like object in which to write encoded bytes.
+        positions: Either a 1D Numpy array or a 2D Numpy array of shape (-1, 3)
+            containing 3D positions.
+        indices: Either a 1D Numpy array or a 2D Numpy array of shape (-1, 3)
+            indicating triples of coordinates from `positions` to make
+            triangles. For example, if the first three values of `indices` are
+            `0`, `1`, `2`, then that defines a triangle formed by the first 9
+            values in `positions`, three for the first vertex (index `0`),
+            three for the second vertex, and three for the third vertex.
 
-    Kwargs:
-        - bounds (List[float], optional): a list of bounds, `[minx, miny, maxx,
-          maxy]`. By default, inferred as the minimum and maximum values of
-          `positions`.
-        - sphere_method: a string designating the algorithm to use for creating
-          the bounding sphere. Must be one of `'bounding_box'`, `'naive'`,
-          `'ritter'` or `None`.
+    Keyword Args:
+        bounds: A list of bounds, `[minx, miny, maxx, maxy]`. By default,
+            inferred as the minimum and maximum values of `positions`.
+        sphere_method: A string designating the algorithm to use for creating
+            the bounding sphere. Must be one of `'bounding_box'`, `'naive'`,
+            `'ritter'` or `None`. See
+            `quantized_mesh_encoder.bounding_sphere.bounding_sphere` for a
+            description of each.
+        ellipsoid: Ellipsoid defined by its semi-major `a` and semi-minor `b`
+            axes. Default: WGS84 ellipsoid.
+        extensions: A sequence of extension instances to encode after the mesh.
 
-          - bounding_box: Finds the bounding box of all positions, then defines
-            the center of the sphere as the center of the bounding box, and
-            defines the radius as the distance back to the corner. This method
-            produces the largest bounding sphere, but is the fastest: roughly 70
-            µs on my computer.
-          - naive: Finds the bounding box of all positions, then defines the
-            center of the sphere as the center of the bounding box. It then
-            checks the distance to every other point and defines the radius as
-            the maximum of these distances. This method will produce a slightly
-            smaller bounding sphere than the `bounding_box` method when points
-            are not in the 3D corners. This is the next fastest at roughly 160
-            µs on my computer.
-          - ritter: Implements the Ritter Method for bounding spheres. It first
-            finds the center of the longest span, then checks every point for
-            containment, enlarging the sphere if necessary. This _can_ produce
-            smaller bounding spheres than the naive method, but it does not
-            always, so often both are run, see next option. This is the slowest
-            method, at roughly 300 µs on my computer.
-          - None: Runs both the naive and the ritter methods, then returns the
-            smaller of the two. Since this runs both algorithms, it takes around
-            500 µs on my computer
-        - ellipsoid: (`Ellipsoid`): ellipsoid defined by its semi-major `a`
-          and semi-minor `b` axes. Default: WGS84 ellipsoid.
-        - extensions: list of instances of the ExtensionBase class.
     """
     # Convert to ndarray
     positions = positions.reshape(-1, 3).astype(np.float32)
     indices = indices.reshape(-1, 3).astype(np.uint32)
 
-    msg = 'ellipsoid must be an instance of the Ellipsoid class.'
-    assert isinstance(ellipsoid, Ellipsoid), msg
+    # Public API raises AssertionError; keep it for backwards compatibility
+    msg = "ellipsoid must be an instance of the Ellipsoid class."
+    assert isinstance(ellipsoid, Ellipsoid), msg  # noqa: S101
 
-    msg = 'extensions must be instances of the Extension class.'
-    assert all(isinstance(ext, ExtensionBase) for ext in extensions), msg
+    msg = "extensions must be instances of the Extension class."
+    assert all(isinstance(ext, ExtensionBase) for ext in extensions), msg  # noqa: S101
 
-    msg = 'extensions must have unique ids.'
-    assert len({ext.id for ext in extensions}) == len(extensions), msg
+    msg = "extensions must have unique ids."
+    assert len({ext.id for ext in extensions}) == len(extensions), msg  # noqa: S101
 
     header = compute_header(positions, sphere_method, ellipsoid=ellipsoid)
     encode_header(f, header)
@@ -97,13 +91,29 @@ def encode(
 
     write_edge_indices(f, positions, n_vertices)
 
-    for ext in extensions:
+    # Only require a `write` method on `f`, not `writelines`
+    for ext in extensions:  # noqa: FURB122
         f.write(ext.encode())
 
 
 def compute_header(
-    positions: np.ndarray, sphere_method: Optional[str], *, ellipsoid: Ellipsoid = WGS84
-) -> Dict[str, Any]:
+    positions: np.ndarray, sphere_method: str | None, *, ellipsoid: Ellipsoid = WGS84
+) -> dict[str, Any]:
+    """Compute the Quantized Mesh header.
+
+    Args:
+        positions: An array of shape (-1, 3) of longitude, latitude, height
+            positions.
+        sphere_method: The bounding sphere algorithm. See
+            `quantized_mesh_encoder.bounding_sphere.bounding_sphere`.
+
+    Keyword Args:
+        ellipsoid: Ellipsoid used to convert positions to ECEF coordinates.
+
+    Returns:
+        A dict of header values, keyed by the field names in the spec.
+
+    """
     header = {}
 
     cartesian_positions = to_ecef(positions, ellipsoid=ellipsoid)
@@ -115,64 +125,63 @@ def compute_header(
     ecef_max_y = cartesian_positions[:, 1].max()
     ecef_max_z = cartesian_positions[:, 2].max()
 
-    header['centerX'] = (ecef_min_x + ecef_max_x) / 2
-    header['centerY'] = (ecef_min_y + ecef_max_y) / 2
-    header['centerZ'] = (ecef_min_z + ecef_max_z) / 2
+    header["centerX"] = (ecef_min_x + ecef_max_x) / 2
+    header["centerY"] = (ecef_min_y + ecef_max_y) / 2
+    header["centerZ"] = (ecef_min_z + ecef_max_z) / 2
 
-    header['minimumHeight'] = positions[:, 2].min()
-    header['maximumHeight'] = positions[:, 2].max()
+    header["minimumHeight"] = positions[:, 2].min()
+    header["maximumHeight"] = positions[:, 2].max()
 
     center, radius = bounding_sphere(cartesian_positions, method=sphere_method)
-    header['boundingSphereCenterX'] = center[0]
-    header['boundingSphereCenterY'] = center[1]
-    header['boundingSphereCenterZ'] = center[2]
-    header['boundingSphereRadius'] = radius
+    header["boundingSphereCenterX"] = center[0]
+    header["boundingSphereCenterY"] = center[1]
+    header["boundingSphereCenterZ"] = center[2]
+    header["boundingSphereRadius"] = radius
 
     occl_pt = occlusion_point(cartesian_positions, center, ellipsoid=ellipsoid)
-    header['horizonOcclusionPointX'] = occl_pt[0]
-    header['horizonOcclusionPointY'] = occl_pt[1]
-    header['horizonOcclusionPointZ'] = occl_pt[2]
+    header["horizonOcclusionPointX"] = occl_pt[0]
+    header["horizonOcclusionPointY"] = occl_pt[1]
+    header["horizonOcclusionPointZ"] = occl_pt[2]
 
     return header
 
 
-def encode_header(f: BinaryIO, data: Dict[str, Any]) -> None:
-    """Encode header data
+def encode_header(f: BinaryIO, data: dict[str, Any]) -> None:
+    """Encode header data.
 
     Args:
-        - f: Opened file descriptor for writing
-        - data: dict of header data
+        f: Opened file descriptor for writing.
+        data: Dict of header data, as returned by `compute_header`.
+
     """
-    f.write(pack(HEADER['centerX'], data['centerX']))
-    f.write(pack(HEADER['centerY'], data['centerY']))
-    f.write(pack(HEADER['centerZ'], data['centerZ']))
+    f.write(pack(HEADER["centerX"], data["centerX"]))
+    f.write(pack(HEADER["centerY"], data["centerY"]))
+    f.write(pack(HEADER["centerZ"], data["centerZ"]))
 
-    f.write(pack(HEADER['minimumHeight'], data['minimumHeight']))
-    f.write(pack(HEADER['maximumHeight'], data['maximumHeight']))
+    f.write(pack(HEADER["minimumHeight"], data["minimumHeight"]))
+    f.write(pack(HEADER["maximumHeight"], data["maximumHeight"]))
 
-    f.write(pack(HEADER['boundingSphereCenterX'], data['boundingSphereCenterX']))
-    f.write(pack(HEADER['boundingSphereCenterY'], data['boundingSphereCenterY']))
-    f.write(pack(HEADER['boundingSphereCenterZ'], data['boundingSphereCenterZ']))
-    f.write(pack(HEADER['boundingSphereRadius'], data['boundingSphereRadius']))
+    f.write(pack(HEADER["boundingSphereCenterX"], data["boundingSphereCenterX"]))
+    f.write(pack(HEADER["boundingSphereCenterY"], data["boundingSphereCenterY"]))
+    f.write(pack(HEADER["boundingSphereCenterZ"], data["boundingSphereCenterZ"]))
+    f.write(pack(HEADER["boundingSphereRadius"], data["boundingSphereRadius"]))
 
-    f.write(pack(HEADER['horizonOcclusionPointX'], data['horizonOcclusionPointX']))
-    f.write(pack(HEADER['horizonOcclusionPointY'], data['horizonOcclusionPointY']))
-    f.write(pack(HEADER['horizonOcclusionPointZ'], data['horizonOcclusionPointZ']))
+    f.write(pack(HEADER["horizonOcclusionPointX"], data["horizonOcclusionPointX"]))
+    f.write(pack(HEADER["horizonOcclusionPointY"], data["horizonOcclusionPointY"]))
+    f.write(pack(HEADER["horizonOcclusionPointZ"], data["horizonOcclusionPointZ"]))
 
 
-def interp_positions(
-    positions: np.ndarray, bounds: Optional[Bounds] = None
-) -> np.ndarray:
-    """Rescale positions to be integers ranging from min to max
-
-    TODO allow 6 input elements, for min/max elevation too?
+def interp_positions(positions: np.ndarray, bounds: Bounds | None = None) -> np.ndarray:
+    """Rescale positions to be integers ranging from 0 to 32767.
 
     Args:
-        - positions
-        - bounds: If provided should be [minx, miny, maxx, maxy]
+        positions: An array of shape (-1, 3) of 3D positions.
+        bounds: If provided should be `[minx, miny, maxx, maxy]`. Heights are
+            always rescaled from their minimum to their maximum.
 
     Returns:
-        ndarray of shape (-1, 3) and dtype np.int16
+        An array of shape (-1, 3) and dtype np.int16.
+
     """
     if bounds:
         minx, miny, maxx, maxy = bounds
@@ -185,18 +194,26 @@ def interp_positions(
     minh = positions[:, 2].min()
     maxh = positions[:, 2].max()
 
-    u = np.interp(positions[:, 0], (minx, maxx), (0, 32767)).astype(np.int16)
-    v = np.interp(positions[:, 1], (miny, maxy), (0, 32767)).astype(np.int16)
-    h = np.interp(positions[:, 2], (minh, maxh), (0, 32767)).astype(np.int16)
+    u = np.interp(positions[:, 0], (minx, maxx), (0, _MAX_QUANTIZED)).astype(np.int16)
+    v = np.interp(positions[:, 1], (miny, maxy), (0, _MAX_QUANTIZED)).astype(np.int16)
+    h = np.interp(positions[:, 2], (minh, maxh), (0, _MAX_QUANTIZED)).astype(np.int16)
 
     return np.vstack([u, v, h]).T
 
 
 def write_vertices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
-    assert positions.ndim == 2, 'positions must be 2 dimensions'
+    """Write the vertex count and zig-zag delta encoded vertex data.
+
+    Args:
+        f: Opened file descriptor for writing.
+        positions: Quantized positions, as returned by `interp_positions`.
+        n_vertices: Number of vertices.
+
+    """
+    assert positions.ndim == 2, "positions must be 2 dimensions"  # noqa: PLR2004, S101
 
     # Write vertex count
-    f.write(pack(VERTEX_DATA['vertexCount'], n_vertices))
+    f.write(pack(VERTEX_DATA["vertexCount"], n_vertices))
 
     u = positions[:, 0]
     v = positions[:, 1]
@@ -212,25 +229,32 @@ def write_vertices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
     h_zz = zig_zag_encode(h_diff).astype(np.uint16)
 
     # Write first value
-    f.write(pack(VERTEX_DATA['uVertexCount'], zig_zag_encode(u[0])))
+    f.write(pack(VERTEX_DATA["uVertexCount"], zig_zag_encode(u[0])))
     # Write array. Must be uint16
     f.write(u_zz.tobytes())
 
     # Write first value
-    f.write(pack(VERTEX_DATA['vVertexCount'], zig_zag_encode(v[0])))
+    f.write(pack(VERTEX_DATA["vVertexCount"], zig_zag_encode(v[0])))
     # Write array. Must be uint16
     f.write(v_zz.tobytes())
 
     # Write first value
-    f.write(pack(VERTEX_DATA['heightVertexCount'], zig_zag_encode(h[0])))
+    f.write(pack(VERTEX_DATA["heightVertexCount"], zig_zag_encode(h[0])))
     # Write array. Must be uint16
     f.write(h_zz.tobytes())
 
 
 def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
-    """Write indices to file"""
+    """Write high-water mark encoded triangle indices.
+
+    Args:
+        f: Opened file descriptor for writing.
+        indices: An array of shape (-1, 3) of triangle indices.
+        n_vertices: Number of vertices, which determines the index size.
+
+    """
     # If more than 65536 vertices, index data must be uint32
-    index_32 = n_vertices > 65536
+    index_32 = n_vertices > _MAX_INDEX16_VERTICES
 
     # Enforce proper byte alignment
     # > padding is added before the IndexData to ensure 2 byte alignment for
@@ -243,8 +267,8 @@ def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
         # Write required number of bytes
         # Not sure the best way to write empty bytes, so I'll just pad with
         # ascii letters for now
-        b = ('a' * n_bytes).encode('ascii')
-        assert len(b) == n_bytes, 'Wrong number of bytes to pad'
+        b = ("a" * n_bytes).encode("ascii")
+        assert len(b) == n_bytes, "Wrong number of bytes to pad"  # noqa: S101
         f.write(b)
 
     # Write number of triangles to file
@@ -263,7 +287,17 @@ def write_indices(f: BinaryIO, indices: np.ndarray, n_vertices: int) -> None:
 
 def find_edge_indices(
     positions: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Find the indices of vertices on each edge of the tile.
+
+    Args:
+        positions: Quantized positions, as returned by `interp_positions`.
+
+    Returns:
+        A tuple of the indices of vertices on the west, south, east and north
+        edges.
+
+    """
     u = positions[:, 0]
     v = positions[:, 1]
 
@@ -271,17 +305,25 @@ def find_edge_indices(
     # Here we only care about the first
     left = np.where(u == 0)[0]
     bottom = np.where(v == 0)[0]
-    right = np.where(u == 32767)[0]
-    top = np.where(v == 32767)[0]
+    right = np.where(u == _MAX_QUANTIZED)[0]
+    top = np.where(v == _MAX_QUANTIZED)[0]
 
     return left, bottom, right, top
 
 
 def write_edge_indices(f: BinaryIO, positions: np.ndarray, n_vertices: int) -> None:
+    """Write the indices of vertices on each edge of the tile.
+
+    Args:
+        f: Opened file descriptor for writing.
+        positions: Quantized positions, as returned by `interp_positions`.
+        n_vertices: Number of vertices, which determines the index size.
+
+    """
     left, bottom, right, top = find_edge_indices(positions)
 
     # If more than 65536 vertices, index data must be uint32
-    index_32 = n_vertices > 65536
+    index_32 = n_vertices > _MAX_INDEX16_VERTICES
     dtype = np.uint32 if index_32 else np.uint16
 
     # No high-water mark encoding on edge indices

@@ -45,3 +45,32 @@ include = ["quantized_mesh_encoder", "quantized_mesh_encoder.*"]
 
 [tool.cibuildwheel]
 skip = "cp38*"
+
+[tool.ruff]
+# React demo app deployed to gh-pages
+extend-exclude = ["site"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812", # trailing comma; conflicts with ruff format
+    "CPY001", # copyright header
+    "D203",   # incompatible with D211
+    "D213",   # incompatible with D212
+    "EM101",  # raw string in exception
+    "EM102",  # f-string in exception
+    "FIX002", # todo statements
+    "TD002",  # todo without author name
+    "TRY003", # define exceptions in the exception class
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test/*" = [
+    "INP001",  # no __init__.py: the `test` dir name would shadow the stdlib package
+    "ANN001",  # annotation in function argument
+    "ANN201",  # return type annotation
+    "PLR2004", # Magic value used in comparison
+    "S101",    # assert
+    "SLF001",  # private member access
+    "D",       # docstring
+]
