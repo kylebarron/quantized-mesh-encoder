@@ -1,3 +1,5 @@
+"""Horizon occlusion point computation."""
+
 import numpy as np
 
 from .constants import WGS84
@@ -5,6 +7,15 @@ from .ellipsoid import Ellipsoid
 
 
 def squared_norm(positions: np.ndarray) -> np.ndarray:
+    """Compute the squared length of each position vector.
+
+    Args:
+        positions: An array of shape (-1, 3).
+
+    Returns:
+        An array of shape (-1,) of squared lengths.
+
+    """
     return (
         np.square(positions[:, 0])
         + np.square(positions[:, 1])
@@ -13,6 +24,18 @@ def squared_norm(positions: np.ndarray) -> np.ndarray:
 
 
 def compute_magnitude(positions: np.ndarray, bounding_center: np.ndarray) -> np.ndarray:
+    """Compute, per position, the magnitude needed to occlude it.
+
+    Args:
+        positions: An array of shape (-1, 3) of positions, scaled to the unit
+            ellipsoid.
+        bounding_center: The bounding sphere center, scaled to the unit
+            ellipsoid.
+
+    Returns:
+        An array of shape (-1,) of magnitudes along `bounding_center`.
+
+    """
     magnitude_squared = squared_norm(positions)
     magnitude = np.sqrt(magnitude_squared)
 
@@ -37,6 +60,21 @@ def compute_magnitude(positions: np.ndarray, bounding_center: np.ndarray) -> np.
 def occlusion_point(
     positions: np.ndarray, bounding_center: np.ndarray, *, ellipsoid: Ellipsoid = WGS84
 ) -> np.ndarray:
+    """Compute the horizon occlusion point.
+
+    Note that this rescales `positions` and `bounding_center` in place.
+
+    Args:
+        positions: An array of shape (-1, 3) of ECEF positions.
+        bounding_center: The ECEF center of the bounding sphere.
+
+    Keyword Args:
+        ellipsoid: Ellipsoid of the ECEF coordinates.
+
+    Returns:
+        The horizon occlusion point in ECEF coordinates.
+
+    """
     cartesian_ellipsoid = np.array([ellipsoid.a, ellipsoid.a, ellipsoid.b])
     # Scale positions relative to ellipsoid
     positions /= cartesian_ellipsoid

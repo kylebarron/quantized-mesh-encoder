@@ -17,7 +17,7 @@ TO_ECEF_TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize("llh_positions,exp_positions", TO_ECEF_TEST_CASES)
+@pytest.mark.parametrize(("llh_positions", "exp_positions"), TO_ECEF_TEST_CASES)
 def test_to_ecef(llh_positions, exp_positions):
     arr = np.array(llh_positions, dtype=np.float32).reshape(-1, 3)
     cart_positions = to_ecef(arr)

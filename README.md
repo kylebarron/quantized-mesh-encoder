@@ -148,7 +148,8 @@ Implements the [Metadata](https://github.com/CesiumGS/quantized-mesh#metadata) e
 
 ```py
 from quantized_mesh_encoder import encode
-with open('output.terrain', 'wb') as f:
+
+with open("output.terrain", "wb") as f:
     encode(f, positions, indices)
 ```
 
@@ -158,7 +159,8 @@ file is to use `gzip.open`:
 ```py
 import gzip
 from quantized_mesh_encoder import encode
-with gzip.open('output.terrain', 'wb') as f:
+
+with gzip.open("output.terrain", "wb") as f:
     encode(f, positions, indices)
 ```
 
@@ -169,6 +171,7 @@ It's also pretty simple to write to an in-memory buffer instead of a file
 ```py
 from io import BytesIO
 from quantized_mesh_encoder import encode
+
 with BytesIO() as bio:
     encode(bio, positions, indices)
 ```
@@ -178,8 +181,9 @@ Or to gzip the in-memory buffer:
 ```py
 import gzip
 from io import BytesIO
+
 with BytesIO() as bio:
-    with gzip.open(bio, 'wb') as gzipf:
+    with gzip.open(bio, "wb") as gzipf:
         encode(gzipf, positions, indices)
 ```
 
@@ -197,7 +201,7 @@ from quantized_mesh_encoder import encode, Ellipsoid
 # From https://ui.adsabs.harvard.edu/abs/2010EM%26P..106....1A/abstract
 mars_ellipsoid = Ellipsoid(3_395_428, 3_377_678)
 
-with open('output.terrain', 'wb') as f:
+with open("output.terrain", "wb") as f:
     encode(f, positions, indices, ellipsoid=mars_ellipsoid)
 ```
 
@@ -207,9 +211,9 @@ with open('output.terrain', 'wb') as f:
 from quantized_mesh_encoder import encode, VertexNormalsExtension, MetadataExtension
 
 vertex_normals = VertexNormalsExtension(positions=positions, indices=indices)
-metadata = MetadataExtension(data={'hello': 'world'})
+metadata = MetadataExtension(data={"hello": "world"})
 
-with open('output.terrain', 'wb') as f:
+with open("output.terrain", "wb") as f:
     encode(f, positions, indices, extensions=(vertex_normals, metadata))
 ```
 
@@ -226,7 +230,7 @@ from pymartini import decode_ele, Martini, rescale_positions
 import mercantile
 
 png = imread(png_path)
-terrain = decode_ele(png, 'terrarium')
+terrain = decode_ele(png, "terrarium")
 terrain = terrain.T
 martini = Martini(png.shape[0] + 1)
 tile = martini.create_tile(terrain)
@@ -236,12 +240,7 @@ vertices, triangles = tile.get_mesh(10)
 bounds = mercantile.bounds(mercantile.Tile(x, y, z))
 
 # Rescale positions to WGS84
-rescaled = rescale_positions(
-    vertices,
-    terrain,
-    bounds=bounds,
-    flip_y=True
-)
+rescaled = rescale_positions(vertices, terrain, bounds=bounds, flip_y=True)
 
 with BytesIO() as f:
     quantized_mesh_encoder.encode(f, rescaled, triangles)

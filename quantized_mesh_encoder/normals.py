@@ -1,11 +1,24 @@
+"""Vertex normal computation and oct encoding."""
+
 import numpy as np
 
 from .util_cy import add_vertex_normals
 
 
 def compute_vertex_normals(positions: np.ndarray, indices: np.ndarray) -> np.ndarray:
+    """Compute per-vertex normals, weighting each face normal by its area.
+
+    Args:
+        positions: An array of shape (-1, 3) of ECEF positions.
+        indices: An array of shape (-1, 3) of triangle indices into
+            `positions`.
+
+    Returns:
+        An array of shape (-1, 3) of unit normal vectors, one per vertex.
+
+    """
     # Make sure indices and positions are both arrays of shape (-1, 3)
-    positions = positions.reshape(-1, 3).astype('float64')
+    positions = positions.reshape(-1, 3).astype("float64")
     # The Cython helper only accepts uint32 indices, the same dtype `encode`
     # casts indices to
     indices = indices.reshape(-1, 3).astype(np.uint32, copy=False)
@@ -40,27 +53,41 @@ def compute_vertex_normals(positions: np.ndarray, indices: np.ndarray) -> np.nda
     add_vertex_normals(indices, weighted_face_normals, vertex_normals)
 
     # Normalize vertex normals by dividing by each vector's length
-    normalized_vertex_normals = (
-        vertex_normals / np.linalg.norm(vertex_normals, axis=1)[:, np.newaxis]
-    )
-
-    return normalized_vertex_normals
+    return vertex_normals / np.linalg.norm(vertex_normals, axis=1)[:, np.newaxis]
 
 
 def sign_not_zero(arr: np.ndarray) -> np.ndarray:
-    """A variation of np.sign that coerces 0 to 1"""
+    """Return the sign of each element, like `np.sign`, but with 0 mapped to 1.
+
+    Args:
+        arr: Input array.
+
+    Returns:
+        An array of -1 and 1.
+
+    """
     return np.where(arr < 0.0, -1, 1)
 
 
 def oct_encode(vec: np.ndarray) -> np.ndarray:
-    """
-    Compress x, y, z 96-bit floating point into x, z 16-bit representation (2 snorm values)
-    https://github.com/AnalyticalGraphicsInc/cesium/blob/b161b6429b9201c99e5fb6f6e6283f3e8328b323/Source/Core/AttributeCompression.js#L43
-    https://github.com/loicgasser/quantized-mesh-tile/blob/750125d3885fd89e3e12dce8fe075fbdc0adc323/quantized_mesh_tile/utils.py#L90-L108
+    """Oct-encode unit vectors into two 8-bit SNORM values each.
 
-    This assumes input vectors are normalized
-    """
+    Compresses x, y, z 96-bit floating point vectors into a 16-bit
+    representation (2 SNORM values).
 
+    Ported from:
+
+    - https://github.com/AnalyticalGraphicsInc/cesium/blob/b161b6429b9201c99e5fb6f6e6283f3e8328b323/Source/Core/AttributeCompression.js#L43
+    - https://github.com/loicgasser/quantized-mesh-tile/blob/750125d3885fd89e3e12dce8fe075fbdc0adc323/quantized_mesh_tile/utils.py#L90-L108
+
+    Args:
+        vec: An array of shape (-1, 3) of unit vectors. Input vectors are
+            assumed to be normalized.
+
+    Returns:
+        An array of shape (-1, 2) and dtype np.uint8.
+
+    """
     l1_norm = np.linalg.norm(vec, ord=1, axis=1)
     result = vec[:, 0:2] / l1_norm[:, np.newaxis]
 
@@ -73,6 +100,4 @@ def oct_encode(vec: np.ndarray) -> np.ndarray:
     # Converts a scalar value in the range [-1.0, 1.0] to an 8-bit SNORM value
     # in the range [0, 255], like Cesium's `CesiumMath.toSNorm`. Scaling by 256
     # would overflow uint8 for a value of exactly 1.0.
-    oct_encoded = np.round((np.clip(result, -1, 1) * 0.5 + 0.5) * 255).astype(np.uint8)
-
-    return oct_encoded
+    return np.round((np.clip(result, -1, 1) * 0.5 + 0.5) * 255).astype(np.uint8)

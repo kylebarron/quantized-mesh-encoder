@@ -22,8 +22,8 @@ def test_bounding_sphere_unit_cube():
 
     cube = np.array(positions).reshape(-1, 3).astype(np.float32)
     center, radius = bounding_sphere(cube)
-    assert np.isclose(np.array([0, 0, 0]), center).all(), 'Incorrect center'
-    assert np.isclose(np.sqrt(3), radius), 'Incorrect radius'
+    assert np.isclose(np.array([0, 0, 0]), center).all(), "Incorrect center"
+    assert np.isclose(np.sqrt(3), radius), "Incorrect radius"
 
 
 # Each inner array must have a multiple of three positions
@@ -43,8 +43,7 @@ BOUNDING_SPHERE_CONTAINMENT_CASES = [
 
 @pytest.mark.parametrize("positions", BOUNDING_SPHERE_CONTAINMENT_CASES)
 def test_bounding_sphere_containment(positions):
-    """
-    For each input of positions, creates a bounding sphere and then makes sure
+    """For each input of positions, creates a bounding sphere and then makes sure
     that each point is inside the sphere.
     """
     positions = np.array(positions).reshape(-1, 3).astype(np.float32)
@@ -54,26 +53,25 @@ def test_bounding_sphere_containment(positions):
     distances = np.linalg.norm(positions - center, axis=1)
 
     # All distances to the center must be <= the radius
-    assert (distances <= radius).all(), 'A position outside bounding sphere'
+    assert (distances <= radius).all(), "A position outside bounding sphere"
 
 
 @pytest.mark.parametrize("positions", BOUNDING_SPHERE_CONTAINMENT_CASES)
 def test_bounding_sphere_containment_ritter(positions):
-    """
-    For each input of positions, creates a bounding sphere and then makes sure
+    """For each input of positions, creates a bounding sphere and then makes sure
     that each point is inside the sphere.
     """
     positions = np.array(positions).reshape(-1, 3).astype(np.float32)
-    center, radius = bounding_sphere(positions, method='ritter')
+    center, radius = bounding_sphere(positions, method="ritter")
 
     # Distance from each point to the center
     distances = np.linalg.norm(positions - center, axis=1)
 
     # All distances to the center must be <= the radius
-    assert (distances <= radius).all(), 'A position outside bounding sphere'
+    assert (distances <= radius).all(), "A position outside bounding sphere"
 
 
-@pytest.mark.parametrize("method", [None, 'ritter'])
+@pytest.mark.parametrize("method", [None, "ritter"])
 def test_bounding_sphere_float64(method):
     """float64 positions are accepted, not only float32."""
     positions = np.array(BOUNDING_SPHERE_CONTAINMENT_CASES[0], dtype=np.float64)
@@ -82,4 +80,6 @@ def test_bounding_sphere_float64(method):
 
     # The sphere is computed in float32, so allow for float32 rounding
     distances = np.linalg.norm(positions - center, axis=1)
-    assert (distances <= radius * (1 + 1e-6)).all(), 'A position outside bounding sphere'
+    assert (distances <= radius * (1 + 1e-6)).all(), (
+        "A position outside bounding sphere"
+    )

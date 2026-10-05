@@ -22,4 +22,4 @@ ENCODE_INDICES_CASES = [[0, 1, 2, 1, 2, 3, 3, 4, 5, 2, 3, 4]]
 def test_encode_indices(indices):
     arr = np.array(indices, dtype=np.uint32)
     out = decode_indices(encode_indices(arr))
-    assert indices == out, 'Incorrect index encoding'
+    assert indices == out, "Incorrect index encoding"
